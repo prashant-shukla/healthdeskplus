@@ -790,14 +790,14 @@
                 ]
             }
         },
-        "/onboarding/quick-register": {
+        "/auth/onboarding/quick-register": {
             "post": {
                 "tags": [
                     "Onboarding"
                 ],
                 "summary": "Quick doctor registration",
                 "description": "Step 1: Quick registration with minimal fields for doctors",
-                "operationId": "1098baaaf8eac05289b05f89f69dbae6",
+                "operationId": "977899db05e17166fdfd8d9ca3ad0797",
                 "requestBody": {
                     "required": true,
                     "content": {

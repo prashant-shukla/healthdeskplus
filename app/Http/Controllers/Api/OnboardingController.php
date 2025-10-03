@@ -18,7 +18,7 @@ class OnboardingController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/onboarding/quick-register",
+     *     path="/auth/onboarding/quick-register",
      *     summary="Quick doctor registration",
      *     description="Step 1: Quick registration with minimal fields for doctors",
      *     tags={"Onboarding"},
