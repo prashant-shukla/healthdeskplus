@@ -459,6 +459,222 @@
                 ]
             }
         },
+        "/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Send password reset link",
+                "description": "Send a password reset link to the user's email address",
+                "operationId": "fea89d2766defe4ad877001920e3f289",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset link sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset link sent to your email address"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or email not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "We couldn't find a user with that email address"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Please wait before retrying"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password",
+                "description": "Reset user password using the token from email",
+                "operationId": "b8d03d5b689dcb65d3771f62d4f90a24",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "token"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "description": "New password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "token": {
+                                        "description": "Reset token from email",
+                                        "type": "string",
+                                        "example": "abc123..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password has been reset successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or invalid token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired reset token"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset failed"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/stats": {
             "get": {
                 "tags": [
@@ -1954,7 +2170,7 @@
         "/auth/social/google/redirect": {
             "get": {
                 "tags": [
-                    "Authentication Social"
+                    "Social Authentication"
                 ],
                 "summary": "Redirect to Google OAuth",
                 "description": "Redirects user to Google OAuth consent screen for authentication",
@@ -2011,7 +2227,7 @@
         "/auth/social/google/callback": {
             "get": {
                 "tags": [
-                    "Authentication Social"
+                    "Social Authentication"
                 ],
                 "summary": "Handle Google OAuth callback",
                 "description": "Processes Google OAuth callback and authenticates/registers user",
@@ -2191,7 +2407,7 @@
         "/auth/social/facebook/redirect": {
             "get": {
                 "tags": [
-                    "Authentication Social"
+                    "Social Authentication"
                 ],
                 "summary": "Redirect to Facebook OAuth",
                 "description": "Redirects user to Facebook OAuth consent screen for authentication",
@@ -2248,7 +2464,7 @@
         "/auth/social/facebook/callback": {
             "get": {
                 "tags": [
-                    "Authentication Social"
+                    "Social Authentication"
                 ],
                 "summary": "Handle Facebook OAuth callback",
                 "description": "Processes Facebook OAuth callback and authenticates/registers user",
@@ -2428,7 +2644,7 @@
         "/auth/social/login-with-token": {
             "post": {
                 "tags": [
-                    "Authentication Social"
+                    "Social Authentication"
                 ],
                 "summary": "Social login with access token",
                 "description": "Authenticate using social provider access token (for mobile applications)",
@@ -3233,15 +3449,15 @@
     "tags": [
         {
             "name": "Onboarding",
-            "description": "Onboarding"
-        },
-        {
-            "name": "Authentication Social",
-            "description": "Authentication Social"
+            "description": "Onboarding endpoints"
         },
         {
             "name": "Authentication",
-            "description": "User authentication endpoints"
+            "description": "Authentication endpoints"
+        },
+        {
+            "name": "Social Authentication",
+            "description": "Social authentication endpoints"
         },
         {
             "name": "Dashboard",

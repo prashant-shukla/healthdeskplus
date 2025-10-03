@@ -39,8 +39,18 @@ use OpenApi\Annotations as OA;
  * )
  * 
  * @OA\Tag(
+ *     name="Onboarding",
+ *     description="Onboarding endpoints"
+ * )
+ * 
+ * @OA\Tag(
  *     name="Authentication",
- *     description="User authentication endpoints"
+ *     description="Authentication endpoints"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Social Authentication",
+ *     description="Social authentication endpoints"
  * )
  * 
  * @OA\Tag(

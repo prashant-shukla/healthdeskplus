@@ -19,7 +19,7 @@ class SocialAuthController extends Controller
      *     path="/auth/social/google/redirect",
      *     summary="Redirect to Google OAuth",
      *     description="Redirects user to Google OAuth consent screen for authentication",
-     *     tags={"Authentication "},
+     *     tags={"Social Authentication"},
      *     @OA\Response(
      *         response=200,
      *         description="Redirect URL generated successfully",
@@ -42,6 +42,19 @@ class SocialAuthController extends Controller
     public function redirectToGoogle()
     {
         try {
+            // Check if Google OAuth is properly configured
+            $clientId = config('services.google.client_id');
+            $clientSecret = config('services.google.client_secret');
+            $redirectUri = config('services.google.redirect');
+            
+            if (empty($clientId) || empty($clientSecret) || empty($redirectUri)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Google OAuth is not properly configured. Please check your environment variables.',
+                    'error' => 'Missing Google OAuth configuration. Required: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI'
+                ], 500);
+            }
+            
             $url = Socialite::driver('google')
                 ->stateless()
                 ->redirect()
@@ -54,8 +67,9 @@ class SocialAuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unable to redirect to Google. Please try again.',
-                'error' => $e->getMessage()
+                'message' => 'Unable to redirect to Google. Please check your Google OAuth configuration.',
+                'error' => $e->getMessage(),
+                'hint' => 'Make sure GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI are set in your .env file'
             ], 500);
         }
     }
@@ -65,7 +79,7 @@ class SocialAuthController extends Controller
      *     path="/auth/social/google/callback",
      *     summary="Handle Google OAuth callback",
      *     description="Processes Google OAuth callback and authenticates/registers user",
-     *     tags={"Authentication "},
+     *     tags={"Social Authentication"},
      *     @OA\Parameter(
      *         name="code",
      *         in="query",
@@ -159,7 +173,7 @@ class SocialAuthController extends Controller
      *     path="/auth/social/facebook/redirect",
      *     summary="Redirect to Facebook OAuth",
      *     description="Redirects user to Facebook OAuth consent screen for authentication",
-     *     tags={"Authentication "},
+     *     tags={"Social Authentication"},
      *     @OA\Response(
      *         response=200,
      *         description="Redirect URL generated successfully",
@@ -182,6 +196,19 @@ class SocialAuthController extends Controller
     public function redirectToFacebook()
     {
         try {
+            // Check if Facebook OAuth is properly configured
+            $clientId = config('services.facebook.client_id');
+            $clientSecret = config('services.facebook.client_secret');
+            $redirectUri = config('services.facebook.redirect');
+            
+            if (empty($clientId) || empty($clientSecret) || empty($redirectUri)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Facebook OAuth is not properly configured. Please check your environment variables.',
+                    'error' => 'Missing Facebook OAuth configuration. Required: FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, FACEBOOK_REDIRECT_URI'
+                ], 500);
+            }
+            
             $url = Socialite::driver('facebook')
                 ->stateless()
                 ->redirect()
@@ -194,8 +221,9 @@ class SocialAuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unable to redirect to Facebook. Please try again.',
-                'error' => $e->getMessage()
+                'message' => 'Unable to redirect to Facebook. Please check your Facebook OAuth configuration.',
+                'error' => $e->getMessage(),
+                'hint' => 'Make sure FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, and FACEBOOK_REDIRECT_URI are set in your .env file'
             ], 500);
         }
     }
@@ -205,7 +233,7 @@ class SocialAuthController extends Controller
      *     path="/auth/social/facebook/callback",
      *     summary="Handle Facebook OAuth callback",
      *     description="Processes Facebook OAuth callback and authenticates/registers user",
-     *     tags={"Authentication "},
+     *     tags={"Social Authentication"},
      *     @OA\Parameter(
      *         name="code",
      *         in="query",
@@ -408,7 +436,7 @@ class SocialAuthController extends Controller
      *     path="/auth/social/login-with-token",
      *     summary="Social login with access token",
      *     description="Authenticate using social provider access token (for mobile applications)",
-     *     tags={"Authentication "},
+     *     tags={"Social Authentication"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(

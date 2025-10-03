@@ -28,9 +28,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes (no authentication required)
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    
+    // Onboarding routes (public - for new doctor registration)
+    Route::prefix('onboarding')->group(function () {
+        Route::post('quick-register', [OnboardingController::class, 'quickRegister']);
+    });
+
     // Social authentication routes
     Route::prefix('social')->group(function () {
         // Google OAuth routes
@@ -45,10 +47,11 @@ Route::prefix('auth')->group(function () {
         Route::post('login-with-token', [SocialAuthController::class, 'loginWithToken']);
     });
     
-    // Onboarding routes (public - for new doctor registration)
-    Route::prefix('onboarding')->group(function () {
-        Route::post('quick-register', [OnboardingController::class, 'quickRegister']);
-    });
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+
 });
 
 // Protected routes (authentication required)
