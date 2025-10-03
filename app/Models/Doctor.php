@@ -26,6 +26,16 @@ class Doctor extends Model
         'working_hours',
         'experience_years',
         'is_available',
+        'onboarding_step',
+        'onboarding_completed',
+        'profile_photo',
+        'documents',
+        'clinic_name',
+        'clinic_address',
+        'clinic_city',
+        'clinic_state',
+        'clinic_pincode',
+        'clinic_phone',
         'settings',
     ];
 
@@ -37,6 +47,8 @@ class Doctor extends Model
             'working_hours' => 'array',
             'settings' => 'array',
             'is_available' => 'boolean',
+            'onboarding_completed' => 'boolean',
+            'documents' => 'array',
         ];
     }
 

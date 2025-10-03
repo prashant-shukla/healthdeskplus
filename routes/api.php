@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SocialAuthController;
+use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
@@ -28,6 +30,25 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    
+    // Social authentication routes
+    Route::prefix('social')->group(function () {
+        // Google OAuth routes
+        Route::get('google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
+        Route::get('google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+        
+        // Facebook OAuth routes
+        Route::get('facebook/redirect', [SocialAuthController::class, 'redirectToFacebook']);
+        Route::get('facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
+        
+        // Mobile app social login with token
+        Route::post('login-with-token', [SocialAuthController::class, 'loginWithToken']);
+    });
+    
+    // Onboarding routes (public - for new doctor registration)
+    Route::prefix('onboarding')->group(function () {
+        Route::post('quick-register', [OnboardingController::class, 'quickRegister']);
+    });
 });
 
 // Protected routes (authentication required)
@@ -38,6 +59,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('profile', [AuthController::class, 'profile']);
         Route::put('profile', [AuthController::class, 'updateProfile']);
+    });
+    
+    // Onboarding routes (protected - for authenticated doctors)
+    Route::prefix('onboarding')->group(function () {
+        Route::get('status', [OnboardingController::class, 'getOnboardingStatus']);
+        Route::post('professional-info', [OnboardingController::class, 'updateProfessionalInfo']);
+        Route::post('clinic-info', [OnboardingController::class, 'updateClinicInfo']);
+        Route::post('upload-documents', [OnboardingController::class, 'uploadDocuments']);
+        Route::post('complete', [OnboardingController::class, 'completeOnboarding']);
     });
 
     // Practice management

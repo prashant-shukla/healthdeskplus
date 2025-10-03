@@ -65,7 +65,7 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Register a new doctor",
+                "summary": "Register a new doctor (Don't use: Only for testing purposes)",
                 "description": "Register a new doctor with practice information",
                 "operationId": "08136088c4862c313b35d6518bab8d3a",
                 "requestBody": {
@@ -562,6 +562,725 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/onboarding/quick-register": {
+            "post": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Quick doctor registration",
+                "description": "Step 1: Quick registration with minimal fields for doctors",
+                "operationId": "1098baaaf8eac05289b05f89f69dbae6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "phone",
+                                    "specialization"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Full name",
+                                        "type": "string",
+                                        "example": "Dr. John Doe"
+                                    },
+                                    "email": {
+                                        "description": "Email address",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "phone": {
+                                        "description": "Phone number with country code",
+                                        "type": "string",
+                                        "example": "+91-9876543210"
+                                    },
+                                    "specialization": {
+                                        "description": "Medical specialization",
+                                        "type": "string",
+                                        "enum": [
+                                            "Allopathy",
+                                            "Homeopathy",
+                                            "Ayurveda"
+                                        ],
+                                        "example": "Allopathy"
+                                    },
+                                    "password": {
+                                        "description": "Password (optional for social login)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "provider": {
+                                        "description": "Registration method",
+                                        "type": "string",
+                                        "enum": [
+                                            "google",
+                                            "facebook",
+                                            "email"
+                                        ],
+                                        "example": "email"
+                                    },
+                                    "provider_id": {
+                                        "description": "Social provider ID (if applicable)",
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "avatar": {
+                                        "description": "Profile photo URL (if from social login)",
+                                        "type": "string",
+                                        "example": "https://example.com/avatar.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Dr. John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "doctor"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://example.com/avatar.jpg"
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "google"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "doctor": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "specialization": {
+                                                            "type": "string",
+                                                            "example": "Allopathy"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "+91-9876543210"
+                                                        },
+                                                        "onboarding_step": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "onboarding_completed": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Registration failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration failed"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/onboarding/professional-info": {
+            "post": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Update professional information",
+                "description": "Step 2.1: Update doctor's professional information",
+                "operationId": "44f067951161fb4d06fe915dd9fc654f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "qualification": {
+                                        "description": "Medical qualifications",
+                                        "type": "string",
+                                        "example": "MBBS, MD"
+                                    },
+                                    "registration_number": {
+                                        "description": "Medical registration number",
+                                        "type": "string",
+                                        "example": "ABC123456"
+                                    },
+                                    "experience_years": {
+                                        "description": "Years of experience",
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "title": {
+                                        "description": "Professional title",
+                                        "type": "string",
+                                        "example": "Dr."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Professional info updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Professional information updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "onboarding_step": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/onboarding/clinic-info": {
+            "post": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Update clinic information",
+                "description": "Step 2.2: Update doctor's clinic/hospital information",
+                "operationId": "9bce1dc03592e7c963eecd2880e94e92",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "clinic_name": {
+                                        "description": "Clinic/Hospital name",
+                                        "type": "string",
+                                        "example": "City Medical Center"
+                                    },
+                                    "clinic_address": {
+                                        "description": "Clinic address",
+                                        "type": "string",
+                                        "example": "123 Main Street"
+                                    },
+                                    "clinic_city": {
+                                        "description": "City",
+                                        "type": "string",
+                                        "example": "Mumbai"
+                                    },
+                                    "clinic_state": {
+                                        "description": "State",
+                                        "type": "string",
+                                        "example": "Maharashtra"
+                                    },
+                                    "clinic_pincode": {
+                                        "description": "Pincode",
+                                        "type": "string",
+                                        "example": "400001"
+                                    },
+                                    "clinic_phone": {
+                                        "description": "Clinic phone number",
+                                        "type": "string",
+                                        "example": "+91-22-12345678"
+                                    },
+                                    "consultation_fees": {
+                                        "description": "Consultation fees",
+                                        "type": "object",
+                                        "example": {
+                                            "general": 500,
+                                            "followup": 300
+                                        }
+                                    },
+                                    "working_hours": {
+                                        "description": "Working hours",
+                                        "type": "object",
+                                        "example": {
+                                            "monday": {
+                                                "start": "09:00",
+                                                "end": "17:00",
+                                                "available": true
+                                            }
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Clinic info updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Clinic information updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "onboarding_step": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 70
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/onboarding/upload-documents": {
+            "post": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Upload documents",
+                "description": "Step 2.3: Upload profile photo and documents (optional)",
+                "operationId": "80355ba14eb16aa37c0e7261b2543811",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "profile_photo": {
+                                        "description": "Profile photo file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "documents": {
+                                        "description": "Certificate/License files",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Documents uploaded successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "onboarding_step": {
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "profile_photo_url": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/storage/profile_photo.jpg"
+                                                },
+                                                "document_urls": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/onboarding/complete": {
+            "post": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Complete onboarding",
+                "description": "Mark onboarding as completed",
+                "operationId": "51b4de76a83319c40b4ba820124d60b9",
+                "responses": {
+                    "200": {
+                        "description": "Onboarding completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Onboarding completed successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "onboarding_completed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/onboarding/status": {
+            "get": {
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Get onboarding status",
+                "description": "Get current onboarding status and completion percentage",
+                "operationId": "4d3f2b56a5fd48f22670a1104782fd23",
+                "responses": {
+                    "200": {
+                        "description": "Onboarding status retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "onboarding_step": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "onboarding_completed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "next_steps": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
                                 }
                             }
                         }
@@ -1231,6 +1950,717 @@
                     }
                 ]
             }
+        },
+        "/auth/social/google/redirect": {
+            "get": {
+                "tags": [
+                    "Authentication Social"
+                ],
+                "summary": "Redirect to Google OAuth",
+                "description": "Redirects user to Google OAuth consent screen for authentication",
+                "operationId": "45f7e404f89a1501ddf85be970aa67b2",
+                "responses": {
+                    "200": {
+                        "description": "Redirect URL generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "redirect_url": {
+                                            "description": "Google OAuth authorization URL",
+                                            "type": "string",
+                                            "example": "https://accounts.google.com/oauth/authorize?..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unable to redirect to Google",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unable to redirect to Google. Please try again."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/social/google/callback": {
+            "get": {
+                "tags": [
+                    "Authentication Social"
+                ],
+                "summary": "Handle Google OAuth callback",
+                "description": "Processes Google OAuth callback and authenticates/registers user",
+                "operationId": "232ade6a9e425e0c08e2c9beae3245e1",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Authorization code from Google",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "State parameter for CSRF protection",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://lh3.googleusercontent.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "google"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Registration and login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration and login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://lh3.googleusercontent.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "google"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Google authentication failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Google authentication failed. Please try again."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/social/facebook/redirect": {
+            "get": {
+                "tags": [
+                    "Authentication Social"
+                ],
+                "summary": "Redirect to Facebook OAuth",
+                "description": "Redirects user to Facebook OAuth consent screen for authentication",
+                "operationId": "8ac2d7aec91d20350fa1be7e93790a4e",
+                "responses": {
+                    "200": {
+                        "description": "Redirect URL generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "redirect_url": {
+                                            "description": "Facebook OAuth authorization URL",
+                                            "type": "string",
+                                            "example": "https://www.facebook.com/v18.0/dialog/oauth?..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unable to redirect to Facebook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unable to redirect to Facebook. Please try again."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/social/facebook/callback": {
+            "get": {
+                "tags": [
+                    "Authentication Social"
+                ],
+                "summary": "Handle Facebook OAuth callback",
+                "description": "Processes Facebook OAuth callback and authenticates/registers user",
+                "operationId": "87c8dfe8ee981df83f93b4b5ce6dee09",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Authorization code from Facebook",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "State parameter for CSRF protection",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://platform-lookaside.fbsbx.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "facebook"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Registration and login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration and login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://platform-lookaside.fbsbx.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "facebook"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Facebook authentication failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Facebook authentication failed. Please try again."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/social/login-with-token": {
+            "post": {
+                "tags": [
+                    "Authentication Social"
+                ],
+                "summary": "Social login with access token",
+                "description": "Authenticate using social provider access token (for mobile applications)",
+                "operationId": "ee5cdfbceb2f5ef482f35655f03cfa3f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "provider",
+                                    "access_token"
+                                ],
+                                "properties": {
+                                    "provider": {
+                                        "description": "Social authentication provider",
+                                        "type": "string",
+                                        "enum": [
+                                            "google",
+                                            "facebook"
+                                        ],
+                                        "example": "google"
+                                    },
+                                    "access_token": {
+                                        "description": "Access token from the social provider",
+                                        "type": "string",
+                                        "example": "ya29.a0AfH6SMC..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://lh3.googleusercontent.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "google"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Registration and login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration and login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc123..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "user_type": {
+                                                            "type": "string",
+                                                            "example": "patient"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "example": "https://lh3.googleusercontent.com/..."
+                                                        },
+                                                        "provider": {
+                                                            "type": "string",
+                                                            "example": "google"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid access token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Google authentication failed. Invalid access token."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The provider field is required."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication failed. Please try again."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1801,6 +3231,14 @@
         }
     },
     "tags": [
+        {
+            "name": "Onboarding",
+            "description": "Onboarding"
+        },
+        {
+            "name": "Authentication Social",
+            "description": "Authentication Social"
+        },
         {
             "name": "Authentication",
             "description": "User authentication endpoints"
