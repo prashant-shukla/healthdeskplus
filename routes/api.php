@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\PracticeController;
+use App\Http\Controllers\Api\AIAssistantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,15 @@ Route::prefix('auth')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+});
+
+// AI Assistant routes (public - for autocomplete and AI features during onboarding)
+Route::prefix('ai')->group(function () {
+    Route::post('autocomplete/clinic', [AIAssistantController::class, 'getClinicAutocomplete']);
+    Route::post('autocomplete/address', [AIAssistantController::class, 'getAddressAutocomplete']);
+    Route::post('place-details', [AIAssistantController::class, 'getPlaceDetails']);
+    Route::post('detect-specialization', [AIAssistantController::class, 'detectSpecialization']);
+    Route::post('refine-input', [AIAssistantController::class, 'refineInput']);
 });
 
 // Protected routes (authentication required)
@@ -152,4 +162,5 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json(['success' => true, 'data' => $stats]);
         });
     });
+
 });

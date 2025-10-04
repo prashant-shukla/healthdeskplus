@@ -24,6 +24,446 @@
         }
     ],
     "paths": {
+        "/ai/autocomplete/clinic": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Get clinic autocomplete suggestions",
+                "description": "Get smart autocomplete suggestions for clinic names and addresses using Google Places API",
+                "operationId": "20557ad96eb7787fbeefa74a37499e20",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "description": "Input text for autocomplete",
+                                        "type": "string",
+                                        "example": "Apollo"
+                                    },
+                                    "city": {
+                                        "description": "City to filter results",
+                                        "type": "string",
+                                        "example": "Mumbai"
+                                    },
+                                    "types": {
+                                        "description": "Types of places to search",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "hospital",
+                                            "doctor"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Autocomplete suggestions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "place_id": {
+                                                        "type": "string",
+                                                        "example": "ChIJ..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Apollo Hospital, Mumbai"
+                                                    },
+                                                    "main_text": {
+                                                        "type": "string",
+                                                        "example": "Apollo Hospital"
+                                                    },
+                                                    "secondary_text": {
+                                                        "type": "string",
+                                                        "example": "Mumbai, Maharashtra, India"
+                                                    },
+                                                    "types": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/autocomplete/address": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Get address autocomplete suggestions",
+                "description": "Get smart autocomplete suggestions for addresses using Google Places API",
+                "operationId": "894be39a6aec7dedfb24a598c3cec725",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "description": "Input text for autocomplete",
+                                        "type": "string",
+                                        "example": "123 Main St"
+                                    },
+                                    "city": {
+                                        "description": "City to filter results",
+                                        "type": "string",
+                                        "example": "Mumbai"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Address autocomplete suggestions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "place_id": {
+                                                        "type": "string",
+                                                        "example": "ChIJ..."
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "123 Main Street, Mumbai"
+                                                    },
+                                                    "main_text": {
+                                                        "type": "string",
+                                                        "example": "123 Main Street"
+                                                    },
+                                                    "secondary_text": {
+                                                        "type": "string",
+                                                        "example": "Mumbai, Maharashtra, India"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/place-details": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Get place details by place ID",
+                "description": "Get detailed information about a place using Google Places API",
+                "operationId": "11a42c50f352310b1d4c880b32e2063a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "place_id"
+                                ],
+                                "properties": {
+                                    "place_id": {
+                                        "description": "Google Places place ID",
+                                        "type": "string",
+                                        "example": "ChIJ..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Place details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Apollo Hospital"
+                                                },
+                                                "formatted_address": {
+                                                    "type": "string",
+                                                    "example": "123 Main St, Mumbai, Maharashtra, India"
+                                                },
+                                                "clinic_address": {
+                                                    "type": "string",
+                                                    "example": "123 Main St"
+                                                },
+                                                "clinic_city": {
+                                                    "type": "string",
+                                                    "example": "Mumbai"
+                                                },
+                                                "clinic_state": {
+                                                    "type": "string",
+                                                    "example": "Maharashtra"
+                                                },
+                                                "clinic_pincode": {
+                                                    "type": "string",
+                                                    "example": "400001"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+91-22-12345678"
+                                                },
+                                                "website": {
+                                                    "type": "string",
+                                                    "example": "https://apollohospitals.com"
+                                                },
+                                                "coordinates": {
+                                                    "properties": {
+                                                        "lat": {
+                                                            "type": "number",
+                                                            "example": 19.076
+                                                        },
+                                                        "lng": {
+                                                            "type": "number",
+                                                            "example": 72.8777
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/detect-specialization": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Detect specialization from qualification text",
+                "description": "Use OpenAI to detect medical specialization from qualification text",
+                "operationId": "8e33c3c2eb7e898aaa7f985b02485f4f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "qualification"
+                                ],
+                                "properties": {
+                                    "qualification": {
+                                        "description": "Medical qualification text",
+                                        "type": "string",
+                                        "example": "MBBS, MD"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Specialization detected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "specialization": {
+                                                    "type": "string",
+                                                    "example": "Allopathy"
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.95
+                                                },
+                                                "extracted_qualifications": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "suggested_specialization_text": {
+                                                    "type": "string",
+                                                    "example": "Allopathy"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/refine-input": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Refine and correct user input",
+                "description": "Use OpenAI to refine and correct messy user input",
+                "operationId": "73e292fc22073967d4210dcba6b11872",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "input",
+                                    "context"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "description": "Input text to refine",
+                                        "type": "string",
+                                        "example": "Applo hosp"
+                                    },
+                                    "context": {
+                                        "description": "Context for refinement",
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic_name",
+                                            "address",
+                                            "qualification",
+                                            "general"
+                                        ],
+                                        "example": "clinic_name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Input refined successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "original_input": {
+                                                    "type": "string",
+                                                    "example": "Applo hosp"
+                                                },
+                                                "refined_input": {
+                                                    "type": "string",
+                                                    "example": "Apollo Hospital"
+                                                },
+                                                "was_changed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/appointments": {
             "get": {
                 "tags": [
@@ -3450,6 +3890,10 @@
         {
             "name": "Onboarding",
             "description": "Onboarding endpoints"
+        },
+        {
+            "name": "AI Assistant",
+            "description": "AI Assistant"
         },
         {
             "name": "Authentication",

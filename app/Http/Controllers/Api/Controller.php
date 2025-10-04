@@ -44,6 +44,11 @@ use OpenApi\Annotations as OA;
  * )
  * 
  * @OA\Tag(
+ *     name="AI Assistant",
+ *     description="AI Assistant"
+ * )
+ * 
+ * @OA\Tag(
  *     name="Authentication",
  *     description="Authentication endpoints"
  * )

@@ -39,6 +39,12 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+        'vision_credentials_path' => env('GOOGLE_VISION_CREDENTIALS_PATH'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
     ],
 
     'facebook' => [
