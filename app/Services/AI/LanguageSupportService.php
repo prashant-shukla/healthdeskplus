@@ -78,13 +78,24 @@ class LanguageSupportService
             ]);
 
             // Perform translation
-            $result = $this->translateClient->translate($text, [
-                'target' => $targetLanguage,
-                'source' => $sourceLanguage
-            ]);
+            try {
+                $result = $this->translateClient->translate($text, [
+                    'target' => $targetLanguage,
+                    'source' => $sourceLanguage
+                ]);
 
-            $translatedText = $result['text'] ?? $text;
-            $detectedSourceLanguage = $result['source'] ?? $sourceLanguage;
+                $translatedText = $result['text'] ?? $text;
+                $detectedSourceLanguage = $result['source'] ?? $sourceLanguage;
+            } catch (\Exception $clientError) {
+                Log::warning('Google Translate client failed, trying direct API call', [
+                    'error' => $clientError->getMessage()
+                ]);
+                
+                // Fallback to direct API call
+                $result = $this->translateDirectAPI($text, $targetLanguage, $sourceLanguage);
+                $translatedText = $result['text'] ?? $text;
+                $detectedSourceLanguage = $result['source'] ?? $sourceLanguage;
+            }
 
             $response = [
                 'success' => true,
@@ -437,6 +448,60 @@ class LanguageSupportService
 
         // Default to English
         return $this->defaultLanguage;
+    }
+
+    /**
+     * Direct API call to Google Translate (fallback method)
+     */
+    private function translateDirectAPI(string $text, string $targetLanguage, string $sourceLanguage = null): array
+    {
+        try {
+            $apiKey = config('services.google.translate_api_key');
+            if (!$apiKey) {
+                throw new \Exception('Google Translate API key not configured');
+            }
+
+            $url = 'https://translation.googleapis.com/language/translate/v2';
+            $data = [
+                'q' => $text,
+                'target' => $targetLanguage,
+                'key' => $apiKey
+            ];
+
+            if ($sourceLanguage) {
+                $data['source'] = $sourceLanguage;
+            }
+
+            $response = \Http::post($url, $data);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                if (isset($result['data']['translations'][0])) {
+                    $translation = $result['data']['translations'][0];
+                    return [
+                        'text' => $translation['translatedText'],
+                        'source' => $sourceLanguage ?? $translation['detectedSourceLanguage'] ?? 'auto',
+                        'confidence' => 1.0
+                    ];
+                }
+            }
+
+            throw new \Exception('Translation API call failed: ' . $response->body());
+
+        } catch (\Exception $e) {
+            Log::error('Direct Google Translate API call failed', [
+                'error' => $e->getMessage(),
+                'text' => $text,
+                'target_language' => $targetLanguage,
+                'source_language' => $sourceLanguage
+            ]);
+
+            return [
+                'text' => $text,
+                'source' => $sourceLanguage ?? 'auto',
+                'confidence' => 0.0
+            ];
+        }
     }
 
     /**

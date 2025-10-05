@@ -241,6 +241,25 @@ php artisan serve
 6. Save the changes
 7. Wait 5-10 minutes for changes to propagate
 
+#### 2.2. Production Environment Issues
+**Error**: `"Method doesn't allow unregistered callers"` in production but works locally
+
+**Solution**:
+1. **Clear configuration cache** in production:
+   ```bash
+   php artisan config:clear
+   php artisan config:cache
+   ```
+
+2. **Verify environment variables** are set correctly in production:
+   ```bash
+   php artisan config:show services.google
+   ```
+
+3. **Check API key restrictions** - ensure the API key allows requests from your production server's IP address
+
+4. **Fallback mechanism**: The service now includes a fallback to direct API calls if the Google Translate client fails
+
 #### 3. Credentials file errors
 - Make sure the Google Cloud Vision credentials file exists
 - Check the file path in your `.env` file
