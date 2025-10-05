@@ -141,8 +141,12 @@ php artisan key:generate
 1. In the same Google Cloud Console project
 2. Enable the Cloud Translation API
 3. Create a new API key specifically for server-side use
-4. **Important**: Don't restrict this API key by HTTP referrer - use "IP addresses" restriction instead, or no restrictions for development
-5. Add the key to your `.env` file
+4. **CRITICAL**: Don't restrict this API key by HTTP referrer - this will block server-side requests
+5. **Recommended restrictions for server-side use**:
+   - **IP addresses**: Add your server's IP address
+   - **Or no restrictions** for development (less secure but easier to test)
+6. **DO NOT use**: HTTP referrer restrictions for server-side API keys
+7. Add the key to your `.env` file
 
 #### Google Cloud Vision API
 1. In the same Google Cloud Console project
@@ -222,6 +226,21 @@ php artisan serve
 - Ensure the API keys have the necessary permissions
 - **For Google Translate API**: Make sure the API key is not restricted by HTTP referrer. Use IP address restrictions or no restrictions for development
 
+#### 2.1. Google Translate API Key Restrictions (Common Issue)
+**Error**: `"Requests from referer <empty> are blocked"` or `"Method doesn't allow unregistered callers"`
+
+**Solution**:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Navigate to "APIs & Services" > "Credentials"
+3. Find your Google Translate API key
+4. Click on the key to edit it
+5. Under "Application restrictions":
+   - **Remove HTTP referrer restrictions** (this blocks server-side requests)
+   - **Use IP addresses** instead (add your server's IP)
+   - **Or select "None"** for development (less secure but easier to test)
+6. Save the changes
+7. Wait 5-10 minutes for changes to propagate
+
 #### 3. Credentials file errors
 - Make sure the Google Cloud Vision credentials file exists
 - Check the file path in your `.env` file
@@ -233,6 +252,32 @@ php artisan serve
 - Consider upgrading your API plan if needed
 
 ### Testing Individual Features
+
+#### Test Translation API (After fixing API key restrictions)
+```bash
+# Test with curl
+curl -X 'POST' \
+  'https://api.healthdeskplus.com/api/ai/translate' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "text": "Hello, how are you?",
+  "target_language": "hi",
+  "source_language": "en"
+}'
+
+# Expected response:
+{
+  "success": true,
+  "data": {
+    "text": "नमस्ते, आप कैसे हैं?",
+    "source_language": "en",
+    "target_language": "hi",
+    "translated": true,
+    "confidence": 0.95
+  }
+}
+```
 
 #### Smart Autocomplete
 ```bash

@@ -18,12 +18,20 @@ class LanguageSupportService
         $this->supportedLanguages = $this->getSupportedLanguages();
         
         try {
+            $apiKey = config('services.google.translate_api_key');
+            if (!$apiKey) {
+                throw new \Exception('Google Translate API key not configured');
+            }
+            
             $this->translateClient = new TranslateClient([
-                'key' => config('services.google.translate_api_key')
+                'key' => $apiKey
             ]);
+            
+            Log::info('Google Translate client initialized successfully');
         } catch (\Exception $e) {
             Log::error('Google Translate client initialization failed', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'api_key' => config('services.google.translate_api_key') ? 'configured' : 'not configured'
             ]);
             $this->translateClient = null;
         }
@@ -60,6 +68,14 @@ class LanguageSupportService
             if ($cached) {
                 return $cached;
             }
+
+            // Log translation attempt
+            Log::info('Attempting translation', [
+                'text' => $text,
+                'target_language' => $targetLanguage,
+                'source_language' => $sourceLanguage,
+                'client_available' => $this->translateClient !== null
+            ]);
 
             // Perform translation
             $result = $this->translateClient->translate($text, [
