@@ -85,7 +85,7 @@
                                                 "properties": {
                                                     "place_id": {
                                                         "type": "string",
-                                                        "example": "ChIJ..."
+                                                        "example": "mock_apollo_mumbai"
                                                     },
                                                     "description": {
                                                         "type": "string",
@@ -191,7 +191,7 @@
                                                 "properties": {
                                                     "place_id": {
                                                         "type": "string",
-                                                        "example": "ChIJ..."
+                                                        "example": "mock_apollo_mumbai"
                                                     },
                                                     "description": {
                                                         "type": "string",
@@ -238,7 +238,7 @@
                                     "place_id": {
                                         "description": "Google Places place ID",
                                         "type": "string",
-                                        "example": "ChIJ..."
+                                        "example": "mock_apollo_mumbai"
                                     }
                                 },
                                 "type": "object"
@@ -322,7 +322,7 @@
                     "AI Assistant"
                 ],
                 "summary": "Detect specialization from qualification text",
-                "description": "Use OpenAI to detect medical specialization from qualification text",
+                "description": "Use enhanced AI and rule-based detection to identify medical specialization from qualification text",
                 "operationId": "8e33c3c2eb7e898aaa7f985b02485f4f",
                 "requestBody": {
                     "required": true,
@@ -374,6 +374,35 @@
                                                 "suggested_specialization_text": {
                                                     "type": "string",
                                                     "example": "Allopathy"
+                                                },
+                                                "detection_method": {
+                                                    "type": "string",
+                                                    "example": "rule_based"
+                                                },
+                                                "specialization_details": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Allopathy"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "Allopathic Medicine"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Modern Western medicine system"
+                                                        },
+                                                        "council": {
+                                                            "type": "string",
+                                                            "example": "Medical Council of India (MCI)"
+                                                        },
+                                                        "practice_type": {
+                                                            "type": "string",
+                                                            "example": "allopathy"
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"
@@ -462,6 +491,684 @@
                         }
                     }
                 }
+            }
+        },
+        "/ai/specializations": {
+            "get": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Get all supported specializations",
+                "description": "Get list of all supported medical specializations with details",
+                "operationId": "3d67f4c6629b393bbc89e50f47b27b35",
+                "responses": {
+                    "200": {
+                        "description": "Specializations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "Allopathy": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Allopathy"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "Allopathic Medicine"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Modern Western medicine system"
+                                                        },
+                                                        "common_qualifications": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "council": {
+                                                            "type": "string",
+                                                            "example": "Medical Council of India (MCI)"
+                                                        },
+                                                        "practice_type": {
+                                                            "type": "string",
+                                                            "example": "allopathy"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/validate-qualification": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Validate qualification against specialization",
+                "description": "Validate if a qualification matches a specific specialization",
+                "operationId": "828295713e43b31aa14092e59d9a85be",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "qualification",
+                                    "specialization"
+                                ],
+                                "properties": {
+                                    "qualification": {
+                                        "description": "Medical qualification",
+                                        "type": "string",
+                                        "example": "MBBS"
+                                    },
+                                    "specialization": {
+                                        "description": "Medical specialization",
+                                        "type": "string",
+                                        "example": "Allopathy"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Qualification validation completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "matched_qualification": {
+                                                    "type": "string",
+                                                    "example": "MBBS"
+                                                },
+                                                "suggested_qualifications": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.9
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/suggest-qualifications": {
+            "post": {
+                "tags": [
+                    "AI Assistant"
+                ],
+                "summary": "Suggest qualifications for specialization",
+                "description": "Get suggested qualifications for a specific medical specialization",
+                "operationId": "7cbd00d4ca97d385d63a6c1faea9e420",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "specialization"
+                                ],
+                                "properties": {
+                                    "specialization": {
+                                        "description": "Medical specialization",
+                                        "type": "string",
+                                        "example": "Allopathy"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Qualifications suggested successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "primary": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "secondary": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "diploma": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/onboarding/chat": {
+            "post": {
+                "tags": [
+                    "AI Onboarding Assistant"
+                ],
+                "summary": "Chat with AI onboarding assistant",
+                "description": "Have a conversational interaction with the AI assistant to complete onboarding",
+                "operationId": "8343f54c674520decc65668640af055e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "description": "User's message to the AI assistant",
+                                        "type": "string",
+                                        "example": "Hi, I'm Dr. John Doe"
+                                    },
+                                    "context": {
+                                        "description": "Additional context for the conversation",
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "AI response generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "response": {
+                                                    "type": "string",
+                                                    "example": "Hello Dr. Doe! Nice to meet you. I'm here to help you complete your registration."
+                                                },
+                                                "form_data": {
+                                                    "description": "Extracted form data from the conversation",
+                                                    "type": "object"
+                                                },
+                                                "next_action": {
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "update_profile"
+                                                        },
+                                                        "step": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Updating profile with extracted information"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "current_step": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "Tell me about your medical qualification",
+                                                        "What is your clinic name?"
+                                                    ]
+                                                },
+                                                "requires_confirmation": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/onboarding/suggestions": {
+            "get": {
+                "tags": [
+                    "AI Onboarding Assistant"
+                ],
+                "summary": "Get conversation suggestions",
+                "description": "Get suggested conversation starters based on current onboarding step",
+                "operationId": "33034da58a73f13f93fccf6b4e66eb49",
+                "responses": {
+                    "200": {
+                        "description": "Suggestions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "Hi! I'm Dr. John Doe",
+                                                        "I have MBBS and MD degrees"
+                                                    ]
+                                                },
+                                                "current_step": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "step_title": {
+                                                    "type": "string",
+                                                    "example": "Basic Information"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/onboarding/progress": {
+            "get": {
+                "tags": [
+                    "AI Onboarding Assistant"
+                ],
+                "summary": "Get onboarding progress summary",
+                "description": "Get detailed progress summary of the onboarding process",
+                "operationId": "105337bc54232f5eb19d354907f45659",
+                "responses": {
+                    "200": {
+                        "description": "Progress summary retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_step": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "steps": {
+                                                    "properties": {
+                                                        "1": {
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "example": "Basic Information"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "example": "Tell us about yourself"
+                                                                },
+                                                                "completed": {
+                                                                    "type": "boolean",
+                                                                    "example": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "next_step": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "is_complete": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/onboarding/update-profile": {
+            "post": {
+                "tags": [
+                    "AI Onboarding Assistant"
+                ],
+                "summary": "Update profile from AI conversation",
+                "description": "Update doctor profile with data extracted from AI conversation",
+                "operationId": "074fc307e723dbf241981089fde4aace",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "form_data"
+                                ],
+                                "properties": {
+                                    "form_data": {
+                                        "description": "Form data extracted from conversation",
+                                        "type": "object"
+                                    },
+                                    "confirm": {
+                                        "description": "Whether to confirm the update",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "updated_fields": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 75
+                                                },
+                                                "next_step": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/onboarding/start": {
+            "post": {
+                "tags": [
+                    "AI Onboarding Assistant"
+                ],
+                "summary": "Start AI onboarding conversation",
+                "description": "Initialize the AI onboarding assistant and get the first message",
+                "operationId": "568bd5f57365cd1a0f5c14570a6611a6",
+                "responses": {
+                    "200": {
+                        "description": "AI onboarding started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "welcome_message": {
+                                                    "type": "string",
+                                                    "example": "Hello! I'm your AI assistant here to help you complete your doctor registration."
+                                                },
+                                                "current_step": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "progress": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/appointments": {
@@ -1230,6 +1937,812 @@
                 ]
             }
         },
+        "/ai/process-document": {
+            "post": {
+                "tags": [
+                    "Document Processing"
+                ],
+                "summary": "Process uploaded document with OCR and AI extraction",
+                "description": "Upload a document and extract structured data using OCR and AI",
+                "operationId": "16fa71686a8e53c4766c7a85690cc391",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "document": {
+                                        "description": "Document file (image or PDF)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "document_type": {
+                                        "description": "Type of document",
+                                        "type": "string",
+                                        "enum": [
+                                            "certificate",
+                                            "license",
+                                            "id_card",
+                                            "degree"
+                                        ],
+                                        "example": "certificate"
+                                    },
+                                    "auto_fill_form": {
+                                        "description": "Whether to auto-fill form fields",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Document processed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "document_type": {
+                                                    "type": "string",
+                                                    "example": "certificate"
+                                                },
+                                                "raw_text": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe MBBS..."
+                                                },
+                                                "structured_data": {
+                                                    "properties": {
+                                                        "doctor_name": {
+                                                            "type": "string",
+                                                            "example": "Dr. John Doe"
+                                                        },
+                                                        "registration_number": {
+                                                            "type": "string",
+                                                            "example": "ABC123456"
+                                                        },
+                                                        "qualification": {
+                                                            "type": "string",
+                                                            "example": "MBBS, MD"
+                                                        },
+                                                        "issuing_authority": {
+                                                            "type": "string",
+                                                            "example": "Medical Council of India"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.85
+                                                },
+                                                "validation": {
+                                                    "properties": {
+                                                        "is_valid": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "confidence_score": {
+                                                            "type": "number",
+                                                            "example": 0.85
+                                                        },
+                                                        "missing_fields": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "warnings": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "suggestions": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "form_data": {
+                                                    "description": "Auto-filled form data",
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/batch-process-documents": {
+            "post": {
+                "tags": [
+                    "Document Processing"
+                ],
+                "summary": "Process multiple documents in batch",
+                "description": "Upload multiple documents and extract structured data from all",
+                "operationId": "2a6e2af2634e39e02c5bbc2b8490dfdd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "documents": {
+                                        "description": "Document files",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "document_types": {
+                                        "description": "Types of documents (certificate, license, etc.)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents processed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "document_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "structured_data": {
+                                                        "type": "object"
+                                                    },
+                                                    "confidence": {
+                                                        "type": "number"
+                                                    },
+                                                    "validation": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/extract-text": {
+            "post": {
+                "tags": [
+                    "Document Processing"
+                ],
+                "summary": "Extract text from document using OCR",
+                "description": "Extract raw text from uploaded document using OCR",
+                "operationId": "644f1ecbebaeab1df44900085be3584f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "document": {
+                                        "description": "Document file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Text extracted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe MBBS..."
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.85
+                                                },
+                                                "word_count": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/translate": {
+            "post": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Translate text to target language",
+                "description": "Translate text using Google Translate API",
+                "operationId": "ed489a0d36f140968214a3571f2c1688",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "text",
+                                    "target_language"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "description": "Text to translate",
+                                        "type": "string",
+                                        "example": "Hello, how are you?"
+                                    },
+                                    "target_language": {
+                                        "description": "Target language code",
+                                        "type": "string",
+                                        "example": "hi"
+                                    },
+                                    "source_language": {
+                                        "description": "Source language code (optional)",
+                                        "type": "string",
+                                        "example": "en"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Translation completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "नमस्ते, आप कैसे हैं?"
+                                                },
+                                                "source_language": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                },
+                                                "target_language": {
+                                                    "type": "string",
+                                                    "example": "hi"
+                                                },
+                                                "translated": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.95
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/translate-batch": {
+            "post": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Translate multiple texts",
+                "description": "Translate multiple texts in a single request",
+                "operationId": "46ab2f0dc878c2bbc861e2988a060277",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "texts",
+                                    "target_language"
+                                ],
+                                "properties": {
+                                    "texts": {
+                                        "description": "Texts to translate",
+                                        "type": "object",
+                                        "example": {
+                                            "greeting": "Hello",
+                                            "farewell": "Goodbye"
+                                        }
+                                    },
+                                    "target_language": {
+                                        "description": "Target language code",
+                                        "type": "string",
+                                        "example": "hi"
+                                    },
+                                    "source_language": {
+                                        "description": "Source language code (optional)",
+                                        "type": "string",
+                                        "example": "en"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch translation completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "greeting": {
+                                                    "properties": {
+                                                        "success": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "text": {
+                                                            "type": "string",
+                                                            "example": "नमस्ते"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "farewell": {
+                                                    "properties": {
+                                                        "success": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "text": {
+                                                            "type": "string",
+                                                            "example": "अलविदा"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/detect-language": {
+            "post": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Detect language of text",
+                "description": "Detect the language of input text using Google Translate API",
+                "operationId": "69cde1be2d92cc00ca2e8f351bd285d0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "text"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "description": "Text to detect language for",
+                                        "type": "string",
+                                        "example": "नमस्ते, आप कैसे हैं?"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Language detection completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "hi"
+                                                },
+                                                "confidence": {
+                                                    "type": "number",
+                                                    "example": 0.95
+                                                },
+                                                "language_name": {
+                                                    "type": "string",
+                                                    "example": "Hindi"
+                                                },
+                                                "native_name": {
+                                                    "type": "string",
+                                                    "example": "हिन्दी"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/languages": {
+            "get": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Get supported languages",
+                "description": "Get list of all supported languages for translation",
+                "operationId": "d85795a43e4681db42b98050d7ba3909",
+                "responses": {
+                    "200": {
+                        "description": "Supported languages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "en": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "English"
+                                                        },
+                                                        "native_name": {
+                                                            "type": "string",
+                                                            "example": "English"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "hi": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Hindi"
+                                                        },
+                                                        "native_name": {
+                                                            "type": "string",
+                                                            "example": "हिन्दी"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/languages/region/{region}": {
+            "get": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Get language preferences for region",
+                "description": "Get language preferences for a specific region",
+                "operationId": "9ef433c255a539305054e527bd1c8dda",
+                "parameters": [
+                    {
+                        "name": "region",
+                        "in": "path",
+                        "description": "Region code (e.g., IN, US, GB)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "IN"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Language preferences retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "region": {
+                                                    "type": "string",
+                                                    "example": "IN"
+                                                },
+                                                "languages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "hi",
+                                                        "en",
+                                                        "ta",
+                                                        "te"
+                                                    ]
+                                                },
+                                                "primary_language": {
+                                                    "type": "string",
+                                                    "example": "hi"
+                                                },
+                                                "fallback_language": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/medical-terms": {
+            "get": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Get medical terms in target language",
+                "description": "Get common medical terms translated to target language",
+                "operationId": "6f3d552d9f49515e8c19538e891c4801",
+                "parameters": [
+                    {
+                        "name": "language",
+                        "in": "query",
+                        "description": "Target language code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "hi"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medical terms retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "hi"
+                                                },
+                                                "terms": {
+                                                    "properties": {
+                                                        "doctor": {
+                                                            "type": "string",
+                                                            "example": "डॉक्टर"
+                                                        },
+                                                        "patient": {
+                                                            "type": "string",
+                                                            "example": "मरीज"
+                                                        },
+                                                        "appointment": {
+                                                            "type": "string",
+                                                            "example": "अपॉइंटमेंट"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/detect-user-language": {
+            "get": {
+                "tags": [
+                    "Language Support"
+                ],
+                "summary": "Detect user's preferred language",
+                "description": "Detect user's preferred language from request headers and parameters",
+                "operationId": "77d7c7fa7853aa3e36707269fd1d2474",
+                "responses": {
+                    "200": {
+                        "description": "User language detected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "hi"
+                                                },
+                                                "language_name": {
+                                                    "type": "string",
+                                                    "example": "Hindi"
+                                                },
+                                                "native_name": {
+                                                    "type": "string",
+                                                    "example": "हिन्दी"
+                                                },
+                                                "detection_method": {
+                                                    "type": "string",
+                                                    "example": "accept_language_header"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/onboarding/quick-register": {
             "post": {
                 "tags": [
@@ -1510,6 +3023,11 @@
                                                 "completion_percentage": {
                                                     "type": "integer",
                                                     "example": 40
+                                                },
+                                                "detected_specialization": {
+                                                    "description": "Auto-detected specialization from qualification",
+                                                    "type": "string",
+                                                    "example": "Allopathy"
                                                 }
                                             },
                                             "type": "object"
@@ -1731,6 +3249,19 @@
                                             "type": "string",
                                             "format": "binary"
                                         }
+                                    },
+                                    "document_types": {
+                                        "description": "Types of documents (optional, defaults to certificate)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "certificate",
+                                                "license",
+                                                "id_card",
+                                                "degree"
+                                            ]
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -1772,6 +3303,56 @@
                                                     "items": {
                                                         "type": "string"
                                                     }
+                                                },
+                                                "extracted_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "document_type": {
+                                                                "type": "string",
+                                                                "example": "certificate"
+                                                            },
+                                                            "structured_data": {
+                                                                "properties": {
+                                                                    "doctor_name": {
+                                                                        "type": "string",
+                                                                        "example": "Dr. John Doe"
+                                                                    },
+                                                                    "registration_number": {
+                                                                        "type": "string",
+                                                                        "example": "ABC123456"
+                                                                    },
+                                                                    "qualification": {
+                                                                        "type": "string",
+                                                                        "example": "MBBS, MD"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "confidence": {
+                                                                "type": "number",
+                                                                "example": 0.92
+                                                            },
+                                                            "validation": {
+                                                                "properties": {
+                                                                    "is_valid": {
+                                                                        "type": "boolean",
+                                                                        "example": true
+                                                                    },
+                                                                    "confidence_score": {
+                                                                        "type": "number",
+                                                                        "example": 0.92
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "ai_processing_enabled": {
+                                                    "type": "boolean",
+                                                    "example": true
                                                 }
                                             },
                                             "type": "object"
@@ -2595,6 +4176,390 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/profile/analyze": {
+            "get": {
+                "tags": [
+                    "Profile Completeness"
+                ],
+                "summary": "Analyze profile completeness",
+                "description": "Get AI-powered analysis of profile completeness with suggestions",
+                "operationId": "f02572a9c96ddbed1ba1b44806709caf",
+                "responses": {
+                    "200": {
+                        "description": "Profile analysis completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "completion_percentage": {
+                                                    "type": "integer",
+                                                    "example": 75
+                                                },
+                                                "basic_analysis": {
+                                                    "properties": {
+                                                        "completion_percentage": {
+                                                            "type": "integer",
+                                                            "example": 75
+                                                        },
+                                                        "total_fields": {
+                                                            "type": "integer",
+                                                            "example": 20
+                                                        },
+                                                        "completed_fields": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "missing_fields": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "critical_missing": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "important_missing": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "ai_suggestions": {
+                                                    "properties": {
+                                                        "priority_actions": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "engagement_suggestions": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "professional_development": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "impact_analysis": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "priority_actions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "action": {
+                                                                "type": "string",
+                                                                "example": "Complete your full name"
+                                                            },
+                                                            "field": {
+                                                                "type": "string",
+                                                                "example": "name"
+                                                            },
+                                                            "priority": {
+                                                                "type": "string",
+                                                                "example": "high"
+                                                            },
+                                                            "estimated_time": {
+                                                                "type": "string",
+                                                                "example": "2-5 minutes"
+                                                            },
+                                                            "impact": {
+                                                                "type": "string",
+                                                                "example": "Critical for profile completion"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "estimated_time_to_complete": {
+                                                    "type": "string",
+                                                    "example": "30 minutes"
+                                                },
+                                                "impact_score": {
+                                                    "type": "integer",
+                                                    "example": 85
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/profile/suggestions": {
+            "get": {
+                "tags": [
+                    "Profile Completeness"
+                ],
+                "summary": "Get profile optimization suggestions",
+                "description": "Get specific suggestions for improving profile completeness",
+                "operationId": "b74a5ac3cc370af80ac14d98041e729b",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Category of suggestions",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "completeness",
+                                "engagement",
+                                "professional",
+                                "all"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Suggestions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "completeness": {
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Profile Completeness"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Complete all required fields to increase patient trust"
+                                                        },
+                                                        "tips": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "engagement": {
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Patient Engagement"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Optimize your profile for better patient interaction"
+                                                        },
+                                                        "tips": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "professional": {
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Professional Development"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Enhance your professional credibility"
+                                                        },
+                                                        "tips": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ai/profile/optimize": {
+            "post": {
+                "tags": [
+                    "Profile Completeness"
+                ],
+                "summary": "Get personalized optimization recommendations",
+                "description": "Get AI-powered personalized recommendations for profile optimization",
+                "operationId": "4a91cd464574b839e8adb49a4fd7e22f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "focus_area": {
+                                        "description": "Area to focus optimization on",
+                                        "type": "string",
+                                        "enum": [
+                                            "completeness",
+                                            "engagement",
+                                            "professional",
+                                            "all"
+                                        ],
+                                        "example": "all"
+                                    },
+                                    "time_available": {
+                                        "description": "Time available for optimization",
+                                        "type": "string",
+                                        "example": "30 minutes"
+                                    },
+                                    "goals": {
+                                        "description": "Optimization goals",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "increase_patients",
+                                            "build_trust",
+                                            "professional_growth"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Optimization recommendations generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "recommendations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "action": {
+                                                                "type": "string",
+                                                                "example": "Add a professional bio"
+                                                            },
+                                                            "reason": {
+                                                                "type": "string",
+                                                                "example": "Builds patient trust and credibility"
+                                                            },
+                                                            "estimated_time": {
+                                                                "type": "string",
+                                                                "example": "10 minutes"
+                                                            },
+                                                            "impact": {
+                                                                "type": "string",
+                                                                "example": "High"
+                                                            },
+                                                            "category": {
+                                                                "type": "string",
+                                                                "example": "engagement"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "priority_order": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "estimated_total_time": {
+                                                    "type": "string",
+                                                    "example": "45 minutes"
+                                                },
+                                                "expected_improvement": {
+                                                    "type": "string",
+                                                    "example": "Profile completeness will increase from 75% to 95%"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -3914,6 +5879,22 @@
         {
             "name": "Appointments",
             "description": "Appointment scheduling and management endpoints"
+        },
+        {
+            "name": "AI Onboarding Assistant",
+            "description": "AI Onboarding Assistant"
+        },
+        {
+            "name": "Document Processing",
+            "description": "Document Processing"
+        },
+        {
+            "name": "Language Support",
+            "description": "Language Support"
+        },
+        {
+            "name": "Profile Completeness",
+            "description": "Profile Completeness"
         }
     ]
 }

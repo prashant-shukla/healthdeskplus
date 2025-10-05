@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Practice;
+use App\Services\AI\SpecializationDetectionService;
+use App\Services\AI\OCRService;
+use App\Services\AI\ProfileCompletenessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +19,19 @@ use OpenApi\Annotations as OA;
 
 class OnboardingController extends Controller
 {
+    private $specializationDetectionService;
+    private $ocrService;
+    private $profileCompletenessService;
+
+    public function __construct(
+        SpecializationDetectionService $specializationDetectionService,
+        OCRService $ocrService,
+        ProfileCompletenessService $profileCompletenessService
+    ) {
+        $this->specializationDetectionService = $specializationDetectionService;
+        $this->ocrService = $ocrService;
+        $this->profileCompletenessService = $profileCompletenessService;
+    }
     /**
      * @OA\Post(
      *     path="/auth/onboarding/quick-register",
@@ -222,7 +238,8 @@ class OnboardingController extends Controller
      *                 property="data",
      *                 type="object",
      *                 @OA\Property(property="onboarding_step", type="integer", example=2),
-     *                 @OA\Property(property="completion_percentage", type="integer", example=40)
+     *                 @OA\Property(property="completion_percentage", type="integer", example=40),
+     *                 @OA\Property(property="detected_specialization", type="string", example="Allopathy", description="Auto-detected specialization from qualification")
      *             )
      *         )
      *     ),
@@ -270,9 +287,20 @@ class OnboardingController extends Controller
         }
 
         try {
-            $doctor->update($request->only([
+            $updateData = $request->only([
                 'qualification', 'registration_number', 'experience_years', 'title'
-            ]));
+            ]);
+
+            // Auto-detect specialization if qualification is provided
+            if (!empty($updateData['qualification'])) {
+                $specializationResult = $this->specializationDetectionService->detectSpecialization($updateData['qualification']);
+                
+                if ($specializationResult['confidence'] >= 0.7) {
+                    $updateData['specialization'] = $specializationResult['specialization'];
+                }
+            }
+
+            $doctor->update($updateData);
 
             // Move to next step
             $doctor->update(['onboarding_step' => 2]);
@@ -285,6 +313,7 @@ class OnboardingController extends Controller
                 'data' => [
                     'onboarding_step' => $doctor->onboarding_step,
                     'completion_percentage' => $completionPercentage,
+                    'detected_specialization' => $updateData['specialization'] ?? null,
                 ]
             ]);
 
@@ -475,7 +504,8 @@ class OnboardingController extends Controller
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 @OA\Property(property="profile_photo", type="string", format="binary", description="Profile photo file"),
-     *                 @OA\Property(property="documents", type="array", @OA\Items(type="string", format="binary"), description="Certificate/License files")
+     *                 @OA\Property(property="documents", type="array", @OA\Items(type="string", format="binary"), description="Certificate/License files"),
+     *                 @OA\Property(property="document_types", type="array", @OA\Items(type="string", enum={"certificate", "license", "id_card", "degree"}), description="Types of documents (optional, defaults to certificate)")
      *             )
      *         )
      *     ),
@@ -491,7 +521,21 @@ class OnboardingController extends Controller
      *                 @OA\Property(property="onboarding_step", type="integer", example=4),
      *                 @OA\Property(property="completion_percentage", type="integer", example=100),
      *                 @OA\Property(property="profile_photo_url", type="string", example="https://example.com/storage/profile_photo.jpg"),
-     *                 @OA\Property(property="document_urls", type="array", @OA\Items(type="string"))
+     *                 @OA\Property(property="document_urls", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="extracted_data", type="array", @OA\Items(
+     *                     @OA\Property(property="document_type", type="string", example="certificate"),
+     *                     @OA\Property(property="structured_data", type="object",
+     *                         @OA\Property(property="doctor_name", type="string", example="Dr. John Doe"),
+     *                         @OA\Property(property="registration_number", type="string", example="ABC123456"),
+     *                         @OA\Property(property="qualification", type="string", example="MBBS, MD")
+     *                     ),
+     *                     @OA\Property(property="confidence", type="number", example=0.92),
+     *                     @OA\Property(property="validation", type="object",
+     *                         @OA\Property(property="is_valid", type="boolean", example=true),
+     *                         @OA\Property(property="confidence_score", type="number", example=0.92)
+     *                     )
+     *                 )),
+     *                 @OA\Property(property="ai_processing_enabled", type="boolean", example=true)
      *             )
      *         )
      *     ),
@@ -540,6 +584,7 @@ class OnboardingController extends Controller
         try {
             $profilePhotoUrl = null;
             $documentUrls = [];
+            $extractedData = [];
 
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
@@ -551,12 +596,42 @@ class OnboardingController extends Controller
                 $doctor->update(['profile_photo' => $profilePhotoUrl]);
             }
 
-            // Handle document uploads
+            // Handle document uploads with AI processing
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $document) {
                     $filename = 'document_' . $doctor->id . '_' . $index . '_' . time() . '.' . $document->getClientOriginalExtension();
                     $path = $document->storeAs('public/doctors/documents', $filename);
-                    $documentUrls[] = Storage::url($path);
+                    $documentUrl = Storage::url($path);
+                    $documentUrls[] = $documentUrl;
+
+                    // Process document with AI if it's a certificate or license
+                    $documentType = $request->input("document_types.{$index}", 'certificate');
+                    if (in_array($documentType, ['certificate', 'license', 'degree'])) {
+                        try {
+                            $extractionResult = $this->ocrService->extractDocumentData($path, $documentType);
+                            
+                            if ($extractionResult['success'] && !empty($extractionResult['structured_data'])) {
+                                $extractedData[] = [
+                                    'document_type' => $documentType,
+                                    'structured_data' => $extractionResult['structured_data'],
+                                    'confidence' => $extractionResult['confidence'],
+                                    'validation' => $this->ocrService->validateExtractedData($extractionResult['structured_data'])
+                                ];
+
+                                // Auto-update doctor profile with extracted data if confidence is high
+                                if ($extractionResult['confidence'] >= 0.8) {
+                                    $this->updateDoctorFromExtractedData($doctor, $extractionResult['structured_data'], $documentType);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            // Log error but continue processing
+                            \Log::warning('Document processing failed', [
+                                'doctor_id' => $doctor->id,
+                                'document_index' => $index,
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
                 }
                 
                 // Store document URLs in the existing documents array
@@ -577,6 +652,8 @@ class OnboardingController extends Controller
                     'completion_percentage' => $completionPercentage,
                     'profile_photo_url' => $profilePhotoUrl,
                     'document_urls' => $documentUrls,
+                    'extracted_data' => $extractedData,
+                    'ai_processing_enabled' => true
                 ]
             ]);
 
@@ -699,6 +776,11 @@ class OnboardingController extends Controller
         $completionPercentage = $this->calculateCompletionPercentage($doctor);
         $nextSteps = $this->getNextSteps($doctor);
 
+        // Get AI-powered profile completeness analysis
+        $profileAnalysis = $this->profileCompletenessService->analyzeProfileCompleteness($doctor);
+        $aiSuggestions = $profileAnalysis['ai_suggestions'] ?? [];
+        $priorityActions = $profileAnalysis['priority_actions'] ?? [];
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -706,7 +788,110 @@ class OnboardingController extends Controller
                 'onboarding_completed' => $doctor->onboarding_completed,
                 'completion_percentage' => $completionPercentage,
                 'next_steps' => $nextSteps,
+                'ai_analysis' => [
+                    'completion_percentage' => $profileAnalysis['completion_percentage'] ?? $completionPercentage,
+                    'priority_actions' => array_slice($priorityActions, 0, 3), // Top 3 actions
+                    'suggestions' => $aiSuggestions['priority_actions'] ?? [],
+                    'impact_score' => $profileAnalysis['impact_score'] ?? 0,
+                    'estimated_time_to_complete' => $profileAnalysis['estimated_time_to_complete'] ?? '30 minutes'
+                ]
             ]
         ]);
+    }
+
+    /**
+     * Update doctor profile from extracted document data
+     */
+    private function updateDoctorFromExtractedData(Doctor $doctor, array $structuredData, string $documentType): void
+    {
+        $updateData = [];
+
+        switch ($documentType) {
+            case 'certificate':
+            case 'license':
+                if (!empty($structuredData['qualification']) && empty($doctor->qualification)) {
+                    $updateData['qualification'] = $structuredData['qualification'];
+                }
+                if (!empty($structuredData['registration_number']) && empty($doctor->registration_number)) {
+                    $updateData['registration_number'] = $structuredData['registration_number'];
+                }
+                if (!empty($structuredData['doctor_name'])) {
+                    $nameParts = $this->parseName($structuredData['doctor_name']);
+                    if (!empty($nameParts['first_name']) && empty($doctor->first_name)) {
+                        $updateData['first_name'] = $nameParts['first_name'];
+                    }
+                    if (!empty($nameParts['last_name']) && empty($doctor->last_name)) {
+                        $updateData['last_name'] = $nameParts['last_name'];
+                    }
+                    if (!empty($nameParts['title']) && empty($doctor->title)) {
+                        $updateData['title'] = $nameParts['title'];
+                    }
+                }
+                break;
+
+            case 'degree':
+                if (!empty($structuredData['degree']) && empty($doctor->qualification)) {
+                    $updateData['qualification'] = $structuredData['degree'];
+                }
+                if (!empty($structuredData['student_name'])) {
+                    $nameParts = $this->parseName($structuredData['student_name']);
+                    if (!empty($nameParts['first_name']) && empty($doctor->first_name)) {
+                        $updateData['first_name'] = $nameParts['first_name'];
+                    }
+                    if (!empty($nameParts['last_name']) && empty($doctor->last_name)) {
+                        $updateData['last_name'] = $nameParts['last_name'];
+                    }
+                }
+                break;
+        }
+
+        // Auto-detect specialization if qualification is updated
+        if (!empty($updateData['qualification'])) {
+            $specializationResult = $this->specializationDetectionService->detectSpecialization($updateData['qualification']);
+            if ($specializationResult['confidence'] >= 0.7 && empty($doctor->specialization)) {
+                $updateData['specialization'] = $specializationResult['specialization'];
+            }
+        }
+
+        // Update doctor profile if there's data to update
+        if (!empty($updateData)) {
+            $doctor->update($updateData);
+        }
+    }
+
+    /**
+     * Parse name into components
+     */
+    private function parseName(string $name): array
+    {
+        $result = [
+            'title' => '',
+            'first_name' => '',
+            'last_name' => ''
+        ];
+
+        // Remove extra whitespace
+        $name = trim($name);
+
+        // Extract title
+        $titles = ['Dr.', 'Prof.', 'Mr.', 'Ms.', 'Mrs.'];
+        foreach ($titles as $title) {
+            if (stripos($name, $title) === 0) {
+                $result['title'] = $title;
+                $name = trim(substr($name, strlen($title)));
+                break;
+            }
+        }
+
+        // Split name into parts
+        $parts = explode(' ', $name);
+        if (count($parts) >= 1) {
+            $result['first_name'] = $parts[0];
+        }
+        if (count($parts) > 1) {
+            $result['last_name'] = implode(' ', array_slice($parts, 1));
+        }
+
+        return $result;
     }
 }

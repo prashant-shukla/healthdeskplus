@@ -13,16 +13,41 @@ class OCRService
 
     public function __construct()
     {
-        try {
-            $this->client = new ImageAnnotatorClient([
-                'credentials' => config('services.google.vision_credentials_path')
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Google Vision client initialization failed', [
-                'error' => $e->getMessage()
-            ]);
-            $this->client = null;
+        // Lazy initialization - only create client when needed
+        $this->client = null;
+    }
+
+    /**
+     * Initialize the Google Vision client
+     */
+    private function initializeClient()
+    {
+        if ($this->client === null) {
+            try {
+                $credentialsPath = config('services.google.vision_credentials_path');
+                
+                if (!$credentialsPath || !file_exists($credentialsPath)) {
+                    Log::warning('Google Vision credentials not configured or file not found', [
+                        'credentials_path' => $credentialsPath
+                    ]);
+                    return false;
+                }
+
+                $this->client = new ImageAnnotatorClient([
+                    'credentials' => $credentialsPath
+                ]);
+                
+                return true;
+            } catch (\Exception $e) {
+                Log::error('Google Vision client initialization failed', [
+                    'error' => $e->getMessage()
+                ]);
+                $this->client = false; // Mark as failed
+                return false;
+            }
         }
+        
+        return $this->client !== false;
     }
 
     /**
@@ -30,10 +55,10 @@ class OCRService
      */
     public function extractTextFromImage(string $imagePath): array
     {
-        if (!$this->client) {
+        if (!$this->initializeClient()) {
             return [
                 'success' => false,
-                'error' => 'OCR service not available',
+                'error' => 'OCR service not available - Google Vision credentials not configured',
                 'text' => ''
             ];
         }
@@ -134,6 +159,116 @@ class OCRService
     }
 
     /**
+     * Extract data from multiple document types
+     */
+    public function extractDocumentData(string $imagePath, string $documentType = 'certificate'): array
+    {
+        $ocrResult = $this->extractTextFromImage($imagePath);
+        
+        if (!$ocrResult['success']) {
+            return $ocrResult;
+        }
+
+        $openAIService = new OpenAIService();
+        
+        switch ($documentType) {
+            case 'certificate':
+                $structuredData = $openAIService->extractCertificateData($ocrResult['text']);
+                break;
+            case 'license':
+                $structuredData = $openAIService->extractLicenseData($ocrResult['text']);
+                break;
+            case 'id_card':
+                $structuredData = $openAIService->extractIdCardData($ocrResult['text']);
+                break;
+            case 'degree':
+                $structuredData = $openAIService->extractDegreeData($ocrResult['text']);
+                break;
+            default:
+                $structuredData = $openAIService->extractCertificateData($ocrResult['text']);
+        }
+
+        return [
+            'success' => true,
+            'document_type' => $documentType,
+            'raw_text' => $ocrResult['text'],
+            'structured_data' => $structuredData,
+            'confidence' => $ocrResult['confidence'],
+            'word_count' => $ocrResult['word_count']
+        ];
+    }
+
+    /**
+     * Batch process multiple documents
+     */
+    public function batchExtractDocuments(array $documentPaths): array
+    {
+        $results = [];
+        
+        foreach ($documentPaths as $index => $document) {
+            $imagePath = $document['path'] ?? $document;
+            $documentType = $document['type'] ?? 'certificate';
+            
+            $results[$index] = $this->extractDocumentData($imagePath, $documentType);
+        }
+
+        return $results;
+    }
+
+    /**
+     * Validate extracted data quality
+     */
+    public function validateExtractedData(array $structuredData): array
+    {
+        $validation = [
+            'is_valid' => true,
+            'confidence_score' => 0.0,
+            'missing_fields' => [],
+            'warnings' => [],
+            'suggestions' => []
+        ];
+
+        // Check for required fields based on document type
+        $requiredFields = [
+            'doctor_name' => 'Doctor name',
+            'registration_number' => 'Registration number',
+            'qualification' => 'Qualification'
+        ];
+
+        $confidenceFactors = [];
+        $totalFields = count($requiredFields);
+        $foundFields = 0;
+
+        foreach ($requiredFields as $field => $label) {
+            if (!empty($structuredData[$field])) {
+                $foundFields++;
+                $confidenceFactors[] = 1.0;
+            } else {
+                $validation['missing_fields'][] = $label;
+                $confidenceFactors[] = 0.0;
+            }
+        }
+
+        // Calculate confidence score
+        $validation['confidence_score'] = array_sum($confidenceFactors) / $totalFields;
+
+        // Add warnings and suggestions
+        if ($validation['confidence_score'] < 0.5) {
+            $validation['warnings'][] = 'Low confidence in extracted data. Please verify manually.';
+            $validation['suggestions'][] = 'Consider uploading a clearer image or different document.';
+        }
+
+        if (count($validation['missing_fields']) > 0) {
+            $validation['warnings'][] = 'Some required fields are missing from the document.';
+            $validation['suggestions'][] = 'Please fill in the missing fields manually.';
+        }
+
+        $validation['is_valid'] = $validation['confidence_score'] >= 0.7 && count($validation['missing_fields']) <= 1;
+
+        return $validation;
+    }
+
+    /**
      * Calculate confidence score from annotations
      */
     private function calculateConfidence($annotations): float
@@ -199,8 +334,12 @@ class OCRService
      */
     public function __destruct()
     {
-        if ($this->client) {
-            $this->client->close();
+        if ($this->client && $this->client !== false) {
+            try {
+                $this->client->close();
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
         }
     }
 }

@@ -11,6 +11,10 @@ use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\PracticeController;
 use App\Http\Controllers\Api\AIAssistantController;
+use App\Http\Controllers\Api\DocumentProcessingController;
+use App\Http\Controllers\Api\AIOnboardingAssistantController;
+use App\Http\Controllers\Api\ProfileCompletenessController;
+use App\Http\Controllers\Api\LanguageSupportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -62,6 +66,23 @@ Route::prefix('ai')->group(function () {
     Route::post('place-details', [AIAssistantController::class, 'getPlaceDetails']);
     Route::post('detect-specialization', [AIAssistantController::class, 'detectSpecialization']);
     Route::post('refine-input', [AIAssistantController::class, 'refineInput']);
+    Route::get('specializations', [AIAssistantController::class, 'getAllSpecializations']);
+    Route::post('validate-qualification', [AIAssistantController::class, 'validateQualification']);
+    Route::post('suggest-qualifications', [AIAssistantController::class, 'suggestQualifications']);
+    
+    // Document processing routes
+    Route::post('process-document', [DocumentProcessingController::class, 'processDocument']);
+    Route::post('batch-process-documents', [DocumentProcessingController::class, 'batchProcessDocuments']);
+    Route::post('extract-text', [DocumentProcessingController::class, 'extractText']);
+    
+    // Language support routes
+    Route::post('translate', [LanguageSupportController::class, 'translate']);
+    Route::post('translate-batch', [LanguageSupportController::class, 'translateBatch']);
+    Route::post('detect-language', [LanguageSupportController::class, 'detectLanguage']);
+    Route::get('languages', [LanguageSupportController::class, 'getSupportedLanguages']);
+    Route::get('languages/region/{region}', [LanguageSupportController::class, 'getLanguagePreferencesForRegion']);
+    Route::get('medical-terms', [LanguageSupportController::class, 'getMedicalTerms']);
+    Route::get('detect-user-language', [LanguageSupportController::class, 'detectUserLanguage']);
 });
 
 // Protected routes (authentication required)
@@ -81,6 +102,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('clinic-info', [OnboardingController::class, 'updateClinicInfo']);
         Route::post('upload-documents', [OnboardingController::class, 'uploadDocuments']);
         Route::post('complete', [OnboardingController::class, 'completeOnboarding']);
+    });
+
+    // AI Onboarding Assistant routes (protected - for authenticated doctors)
+    Route::prefix('ai/onboarding')->group(function () {
+        Route::post('start', [AIOnboardingAssistantController::class, 'start']);
+        Route::post('chat', [AIOnboardingAssistantController::class, 'chat']);
+        Route::get('suggestions', [AIOnboardingAssistantController::class, 'getSuggestions']);
+        Route::get('progress', [AIOnboardingAssistantController::class, 'getProgress']);
+        Route::post('update-profile', [AIOnboardingAssistantController::class, 'updateProfile']);
+    });
+
+    // Profile Completeness routes (protected - for authenticated doctors)
+    Route::prefix('ai/profile')->group(function () {
+        Route::get('analyze', [ProfileCompletenessController::class, 'analyze']);
+        Route::get('suggestions', [ProfileCompletenessController::class, 'getSuggestions']);
+        Route::post('optimize', [ProfileCompletenessController::class, 'optimize']);
     });
 
     // Practice management

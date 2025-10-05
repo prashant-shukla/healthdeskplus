@@ -95,6 +95,12 @@ class GooglePlacesService
      */
     public function getPlaceDetails(string $placeId): ?array
     {
+        // Check if API key is configured
+        if (empty($this->apiKey)) {
+            Log::warning('Google Places API key not configured, returning mock place details');
+            return $this->getMockPlaceDetails($placeId);
+        }
+
         try {
             $response = Http::get($this->baseUrl . '/details/json', [
                 'place_id' => $placeId,
@@ -115,13 +121,17 @@ class GooglePlacesService
                 'response' => $response->json()
             ]);
 
-            return null;
+            // Return mock data if API fails
+            return $this->getMockPlaceDetails($placeId);
+
         } catch (\Exception $e) {
             Log::error('Google Places Details API exception', [
                 'place_id' => $placeId,
                 'error' => $e->getMessage()
             ]);
-            return null;
+
+            // Return mock data on exception
+            return $this->getMockPlaceDetails($placeId);
         }
     }
 
@@ -405,5 +415,106 @@ class GooglePlacesService
                 ]
             ]
         ];
+    }
+
+    /**
+     * Get mock place details for testing
+     */
+    private function getMockPlaceDetails(string $placeId): ?array
+    {
+        $mockPlaceDetails = [
+            'mock_apollo_mumbai' => [
+                'name' => 'Apollo Hospital',
+                'formatted_address' => 'Apollo Hospital, Mumbai, Maharashtra, India',
+                'address_components' => [
+                    ['long_name' => 'Apollo Hospital', 'short_name' => 'Apollo Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'Mumbai', 'short_name' => 'Mumbai', 'types' => ['locality']],
+                    ['long_name' => 'Maharashtra', 'short_name' => 'MH', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 19.0760, 'lng' => 72.8777]
+                ],
+                'formatted_phone_number' => '+91 22 6666 6666',
+                'website' => 'https://www.apollohospitals.com'
+            ],
+            'mock_apollo_delhi' => [
+                'name' => 'Apollo Hospital',
+                'formatted_address' => 'Apollo Hospital, New Delhi, Delhi, India',
+                'address_components' => [
+                    ['long_name' => 'Apollo Hospital', 'short_name' => 'Apollo Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'New Delhi', 'short_name' => 'New Delhi', 'types' => ['locality']],
+                    ['long_name' => 'Delhi', 'short_name' => 'DL', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 28.6139, 'lng' => 77.2090]
+                ],
+                'formatted_phone_number' => '+91 11 6666 6666',
+                'website' => 'https://www.apollohospitals.com'
+            ],
+            'mock_fortis_mumbai' => [
+                'name' => 'Fortis Hospital',
+                'formatted_address' => 'Fortis Hospital, Mumbai, Maharashtra, India',
+                'address_components' => [
+                    ['long_name' => 'Fortis Hospital', 'short_name' => 'Fortis Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'Mumbai', 'short_name' => 'Mumbai', 'types' => ['locality']],
+                    ['long_name' => 'Maharashtra', 'short_name' => 'MH', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 19.0760, 'lng' => 72.8777]
+                ],
+                'formatted_phone_number' => '+91 22 7777 7777',
+                'website' => 'https://www.fortishealthcare.com'
+            ],
+            'mock_max_delhi' => [
+                'name' => 'Max Hospital',
+                'formatted_address' => 'Max Hospital, New Delhi, Delhi, India',
+                'address_components' => [
+                    ['long_name' => 'Max Hospital', 'short_name' => 'Max Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'New Delhi', 'short_name' => 'New Delhi', 'types' => ['locality']],
+                    ['long_name' => 'Delhi', 'short_name' => 'DL', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 28.6139, 'lng' => 77.2090]
+                ],
+                'formatted_phone_number' => '+91 11 8888 8888',
+                'website' => 'https://www.maxhealthcare.in'
+            ],
+            'mock_manipal_bangalore' => [
+                'name' => 'Manipal Hospital',
+                'formatted_address' => 'Manipal Hospital, Bangalore, Karnataka, India',
+                'address_components' => [
+                    ['long_name' => 'Manipal Hospital', 'short_name' => 'Manipal Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'Bangalore', 'short_name' => 'Bangalore', 'types' => ['locality']],
+                    ['long_name' => 'Karnataka', 'short_name' => 'KA', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 12.9716, 'lng' => 77.5946]
+                ],
+                'formatted_phone_number' => '+91 80 9999 9999',
+                'website' => 'https://www.manipalhospitals.com'
+            ],
+            'mock_medanta_delhi' => [
+                'name' => 'Medanta Hospital',
+                'formatted_address' => 'Medanta Hospital, New Delhi, Delhi, India',
+                'address_components' => [
+                    ['long_name' => 'Medanta Hospital', 'short_name' => 'Medanta Hospital', 'types' => ['establishment']],
+                    ['long_name' => 'New Delhi', 'short_name' => 'New Delhi', 'types' => ['locality']],
+                    ['long_name' => 'Delhi', 'short_name' => 'DL', 'types' => ['administrative_area_level_1']],
+                    ['long_name' => 'India', 'short_name' => 'IN', 'types' => ['country']]
+                ],
+                'geometry' => [
+                    'location' => ['lat' => 28.6139, 'lng' => 77.2090]
+                ],
+                'formatted_phone_number' => '+91 11 5555 5555',
+                'website' => 'https://www.medanta.org'
+            ]
+        ];
+
+        return $mockPlaceDetails[$placeId] ?? null;
     }
 }

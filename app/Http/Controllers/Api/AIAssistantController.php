@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AI\GooglePlacesService;
 use App\Services\AI\OpenAIService;
 use App\Services\AI\OCRService;
+use App\Services\AI\SpecializationDetectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Annotations as OA;
@@ -15,14 +16,17 @@ class AIAssistantController extends Controller
     private $googlePlacesService;
     private $openAIService;
     private $ocrService;
+    private $specializationDetectionService;
 
     public function __construct(
         GooglePlacesService $googlePlacesService,
         OpenAIService $openAIService,
+        SpecializationDetectionService $specializationDetectionService,
         ?OCRService $ocrService = null
     ) {
         $this->googlePlacesService = $googlePlacesService;
         $this->openAIService = $openAIService;
+        $this->specializationDetectionService = $specializationDetectionService;
         $this->ocrService = $ocrService;
     }
 
@@ -47,7 +51,7 @@ class AIAssistantController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items(
-     *                 @OA\Property(property="place_id", type="string", example="ChIJ..."),
+     *                 @OA\Property(property="place_id", type="string", example="mock_apollo_mumbai"),
      *                 @OA\Property(property="description", type="string", example="Apollo Hospital, Mumbai"),
      *                 @OA\Property(property="main_text", type="string", example="Apollo Hospital"),
      *                 @OA\Property(property="secondary_text", type="string", example="Mumbai, Maharashtra, India"),
@@ -133,7 +137,7 @@ class AIAssistantController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items(
-     *                 @OA\Property(property="place_id", type="string", example="ChIJ..."),
+     *                 @OA\Property(property="place_id", type="string", example="mock_apollo_mumbai"),
      *                 @OA\Property(property="description", type="string", example="123 Main Street, Mumbai"),
      *                 @OA\Property(property="main_text", type="string", example="123 Main Street"),
      *                 @OA\Property(property="secondary_text", type="string", example="Mumbai, Maharashtra, India")
@@ -192,7 +196,7 @@ class AIAssistantController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"place_id"},
-     *             @OA\Property(property="place_id", type="string", example="ChIJ...", description="Google Places place ID")
+     *             @OA\Property(property="place_id", type="string", example="mock_apollo_mumbai", description="Google Places place ID")
      *         )
      *     ),
      *     @OA\Response(
@@ -261,7 +265,7 @@ class AIAssistantController extends Controller
      * @OA\Post(
      *     path="/ai/detect-specialization",
      *     summary="Detect specialization from qualification text",
-     *     description="Use OpenAI to detect medical specialization from qualification text",
+     *     description="Use enhanced AI and rule-based detection to identify medical specialization from qualification text",
      *     tags={"AI Assistant"},
      *     @OA\RequestBody(
      *         required=true,
@@ -279,7 +283,15 @@ class AIAssistantController extends Controller
      *                 @OA\Property(property="specialization", type="string", example="Allopathy"),
      *                 @OA\Property(property="confidence", type="number", example=0.95),
      *                 @OA\Property(property="extracted_qualifications", type="array", @OA\Items(type="string")),
-     *                 @OA\Property(property="suggested_specialization_text", type="string", example="Allopathy")
+     *                 @OA\Property(property="suggested_specialization_text", type="string", example="Allopathy"),
+     *                 @OA\Property(property="detection_method", type="string", example="rule_based"),
+     *                 @OA\Property(property="specialization_details", type="object",
+     *                     @OA\Property(property="name", type="string", example="Allopathy"),
+     *                     @OA\Property(property="full_name", type="string", example="Allopathic Medicine"),
+     *                     @OA\Property(property="description", type="string", example="Modern Western medicine system"),
+     *                     @OA\Property(property="council", type="string", example="Medical Council of India (MCI)"),
+     *                     @OA\Property(property="practice_type", type="string", example="allopathy")
+     *                 )
      *             )
      *         )
      *     )
@@ -301,7 +313,10 @@ class AIAssistantController extends Controller
 
         try {
             $qualification = $request->qualification;
-            $result = $this->openAIService->detectSpecialization($qualification);
+            $result = $this->specializationDetectionService->detectSpecialization($qualification);
+            
+            // Add specialization details
+            $result['specialization_details'] = $this->specializationDetectionService->getSpecializationDetails($result['specialization']);
 
             return response()->json([
                 'success' => true,
@@ -379,6 +394,173 @@ class AIAssistantController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to refine input',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/ai/specializations",
+     *     summary="Get all supported specializations",
+     *     description="Get list of all supported medical specializations with details",
+     *     tags={"AI Assistant"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Specializations retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="Allopathy", type="object",
+     *                     @OA\Property(property="name", type="string", example="Allopathy"),
+     *                     @OA\Property(property="full_name", type="string", example="Allopathic Medicine"),
+     *                     @OA\Property(property="description", type="string", example="Modern Western medicine system"),
+     *                     @OA\Property(property="common_qualifications", type="array", @OA\Items(type="string")),
+     *                     @OA\Property(property="council", type="string", example="Medical Council of India (MCI)"),
+     *                     @OA\Property(property="practice_type", type="string", example="allopathy")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getAllSpecializations()
+    {
+        try {
+            $specializations = $this->specializationDetectionService->getAllSpecializations();
+
+            return response()->json([
+                'success' => true,
+                'data' => $specializations
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get specializations',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/ai/validate-qualification",
+     *     summary="Validate qualification against specialization",
+     *     description="Validate if a qualification matches a specific specialization",
+     *     tags={"AI Assistant"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"qualification", "specialization"},
+     *             @OA\Property(property="qualification", type="string", example="MBBS", description="Medical qualification"),
+     *             @OA\Property(property="specialization", type="string", example="Allopathy", description="Medical specialization")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Qualification validation completed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="is_valid", type="boolean", example=true),
+     *                 @OA\Property(property="matched_qualification", type="string", example="MBBS"),
+     *                 @OA\Property(property="suggested_qualifications", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="confidence", type="number", example=0.9)
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function validateQualification(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'qualification' => 'required|string|max:500',
+            'specialization' => 'required|string|in:Allopathy,Homeopathy,Ayurveda,Unani,Siddha'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $qualification = $request->qualification;
+            $specialization = $request->specialization;
+            
+            $result = $this->specializationDetectionService->validateQualification($qualification, $specialization);
+
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to validate qualification',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/ai/suggest-qualifications",
+     *     summary="Suggest qualifications for specialization",
+     *     description="Get suggested qualifications for a specific medical specialization",
+     *     tags={"AI Assistant"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"specialization"},
+     *             @OA\Property(property="specialization", type="string", example="Allopathy", description="Medical specialization")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Qualifications suggested successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="primary", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="secondary", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="diploma", type="array", @OA\Items(type="string"))
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function suggestQualifications(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'specialization' => 'required|string|in:Allopathy,Homeopathy,Ayurveda,Unani,Siddha'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $specialization = $request->specialization;
+            $suggestions = $this->specializationDetectionService->suggestQualifications($specialization);
+
+            return response()->json([
+                'success' => true,
+                'data' => $suggestions
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to suggest qualifications',
                 'error' => $e->getMessage()
             ], 500);
         }

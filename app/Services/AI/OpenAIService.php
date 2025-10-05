@@ -52,13 +52,13 @@ class OpenAIService
                 'response' => $response->json()
             ]);
 
-            return $input;
+            return $this->getDefaultRefinement($input, $context);
         } catch (\Exception $e) {
             Log::error('OpenAI API exception', [
                 'input' => $input,
                 'error' => $e->getMessage()
             ]);
-            return $input;
+            return $this->getDefaultRefinement($input, $context);
         }
     }
 
@@ -180,6 +180,176 @@ class OpenAIService
     }
 
     /**
+     * Extract data from medical license
+     */
+    public function extractLicenseData(string $extractedText): array
+    {
+        try {
+            $prompt = "Extract medical license information from this text: '{$extractedText}'. 
+            Return a JSON response with:
+            - doctor_name: extracted doctor name
+            - license_number: license/registration number
+            - qualification: medical qualification
+            - issuing_authority: issuing medical council/authority
+            - issue_date: issue date if found
+            - expiry_date: expiry date if found
+            - specialization: medical specialization if mentioned
+            - confidence: confidence score (0-1)";
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/chat/completions', [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a medical license data extractor. Return only valid JSON without explanations.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'max_tokens' => 300,
+                'temperature' => 0.1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = trim($data['choices'][0]['message']['content'] ?? '{}');
+                
+                $result = json_decode($content, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $result;
+                }
+            }
+
+            return [];
+        } catch (\Exception $e) {
+            Log::error('OpenAI license extraction exception', [
+                'extracted_text' => $extractedText,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    /**
+     * Extract data from ID card
+     */
+    public function extractIdCardData(string $extractedText): array
+    {
+        try {
+            $prompt = "Extract ID card information from this text: '{$extractedText}'. 
+            Return a JSON response with:
+            - name: extracted name
+            - id_number: ID number
+            - date_of_birth: date of birth if found
+            - address: address if found
+            - phone: phone number if found
+            - email: email if found
+            - issuing_authority: issuing authority
+            - issue_date: issue date if found
+            - expiry_date: expiry date if found
+            - confidence: confidence score (0-1)";
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/chat/completions', [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an ID card data extractor. Return only valid JSON without explanations.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'max_tokens' => 300,
+                'temperature' => 0.1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = trim($data['choices'][0]['message']['content'] ?? '{}');
+                
+                $result = json_decode($content, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $result;
+                }
+            }
+
+            return [];
+        } catch (\Exception $e) {
+            Log::error('OpenAI ID card extraction exception', [
+                'extracted_text' => $extractedText,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    /**
+     * Extract data from degree certificate
+     */
+    public function extractDegreeData(string $extractedText): array
+    {
+        try {
+            $prompt = "Extract degree certificate information from this text: '{$extractedText}'. 
+            Return a JSON response with:
+            - student_name: extracted student name
+            - degree: degree name (MBBS, MD, etc.)
+            - specialization: specialization if mentioned
+            - university: university/institution name
+            - graduation_date: graduation date if found
+            - grade: grade/percentage if found
+            - roll_number: roll number if found
+            - confidence: confidence score (0-1)";
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/chat/completions', [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a degree certificate data extractor. Return only valid JSON without explanations.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'max_tokens' => 300,
+                'temperature' => 0.1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = trim($data['choices'][0]['message']['content'] ?? '{}');
+                
+                $result = json_decode($content, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $result;
+                }
+            }
+
+            return [];
+        } catch (\Exception $e) {
+            Log::error('OpenAI degree extraction exception', [
+                'extracted_text' => $extractedText,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    /**
      * Generate profile completeness suggestions
      */
     public function generateProfileSuggestions(array $profileData): array
@@ -260,20 +430,11 @@ class OpenAIService
     {
         $qualification = strtoupper($qualification);
         
-        // Simple rule-based fallback
-        if (strpos($qualification, 'MBBS') !== false || strpos($qualification, 'MD') !== false || strpos($qualification, 'MS') !== false) {
-            return [
-                'specialization' => 'Allopathy',
-                'confidence' => 0.8,
-                'extracted_qualifications' => [$qualification],
-                'suggested_specialization_text' => 'Allopathy'
-            ];
-        }
-        
+        // Check for specific medical systems first (more specific patterns)
         if (strpos($qualification, 'BHMS') !== false || strpos($qualification, 'DHMS') !== false) {
             return [
                 'specialization' => 'Homeopathy',
-                'confidence' => 0.8,
+                'confidence' => 0.9,
                 'extracted_qualifications' => [$qualification],
                 'suggested_specialization_text' => 'Homeopathy'
             ];
@@ -282,9 +443,21 @@ class OpenAIService
         if (strpos($qualification, 'BAMS') !== false || strpos($qualification, 'MD AYURVEDA') !== false) {
             return [
                 'specialization' => 'Ayurveda',
-                'confidence' => 0.8,
+                'confidence' => 0.9,
                 'extracted_qualifications' => [$qualification],
                 'suggested_specialization_text' => 'Ayurveda'
+            ];
+        }
+        
+        // Check for Allopathy (but exclude if it's part of other systems)
+        if (strpos($qualification, 'MBBS') !== false || 
+            (strpos($qualification, 'MD') !== false && strpos($qualification, 'BHMS') === false && strpos($qualification, 'BAMS') === false) ||
+            (strpos($qualification, 'MS') !== false && strpos($qualification, 'BHMS') === false && strpos($qualification, 'BAMS') === false)) {
+            return [
+                'specialization' => 'Allopathy',
+                'confidence' => 0.8,
+                'extracted_qualifications' => [$qualification],
+                'suggested_specialization_text' => 'Allopathy'
             ];
         }
 
@@ -332,5 +505,165 @@ class OpenAIService
             'missing_critical_fields' => $missingFields,
             'suggestions' => $suggestions
         ];
+    }
+
+    /**
+     * Get default refinement when AI fails
+     */
+    private function getDefaultRefinement(string $input, string $context): string
+    {
+        $input = trim($input);
+        $originalInput = $input;
+        
+        // Common typos and corrections
+        $corrections = [
+            // Hospital names
+            'applo' => 'apollo',
+            'apolo' => 'apollo',
+            'appolo' => 'apollo',
+            'fortis' => 'fortis',
+            'max' => 'max',
+            'manipal' => 'manipal',
+            'medanta' => 'medanta',
+            'aiims' => 'aiims',
+            'lilavati' => 'lilavati',
+            'kokilaben' => 'kokilaben',
+            
+            // Common words
+            'hosp' => 'hospital',
+            'hospitl' => 'hospital',
+            'hospit' => 'hospital',
+            'clinic' => 'clinic',
+            'medical' => 'medical',
+            'health' => 'health',
+            'care' => 'care',
+            'center' => 'centre',
+            'center' => 'centre',
+            
+            // Address terms
+            'st' => 'street',
+            'rd' => 'road',
+            'ave' => 'avenue',
+            'blvd' => 'boulevard',
+            'apt' => 'apartment',
+            'flr' => 'floor',
+            'bldg' => 'building',
+            
+            // Cities
+            'mumbai' => 'mumbai',
+            'delhi' => 'delhi',
+            'bangalore' => 'bangalore',
+            'chennai' => 'chennai',
+            'kolkata' => 'kolkata',
+            'hyderabad' => 'hyderabad',
+            'pune' => 'pune',
+            'ahmedabad' => 'ahmedabad',
+            'jaipur' => 'jaipur',
+            'lucknow' => 'lucknow',
+        ];
+        
+        // Apply corrections based on context
+        switch ($context) {
+            case 'clinic_name':
+                // For clinic names, focus on hospital name corrections
+                $input = strtolower($input);
+                // Use word boundaries to avoid partial replacements
+                foreach ($corrections as $wrong => $correct) {
+                    $input = preg_replace('/\b' . preg_quote($wrong, '/') . '\b/', $correct, $input);
+                }
+                // Capitalize first letter of each word
+                $input = ucwords($input);
+                break;
+                
+            case 'address':
+                // For addresses, focus on address term corrections
+                $input = strtolower($input);
+                foreach ($corrections as $wrong => $correct) {
+                    $input = str_replace($wrong, $correct, $input);
+                }
+                // Capitalize first letter of each word
+                $input = ucwords($input);
+                break;
+                
+            case 'qualification':
+                // For qualifications, focus on medical term corrections
+                $input = strtoupper($input);
+                $qualificationCorrections = [
+                    'MBBS' => 'MBBS',
+                    'MD' => 'MD',
+                    'MS' => 'MS',
+                    'BHMS' => 'BHMS',
+                    'BAMS' => 'BAMS',
+                    'DHMS' => 'DHMS',
+                    'DNB' => 'DNB',
+                    'MCH' => 'MCH',
+                    'DM' => 'DM',
+                ];
+                foreach ($qualificationCorrections as $wrong => $correct) {
+                    $input = str_replace($wrong, $correct, $input);
+                }
+                break;
+                
+            default:
+                // General refinement
+                $input = strtolower($input);
+                foreach ($corrections as $wrong => $correct) {
+                    $input = str_replace($wrong, $correct, $input);
+                }
+                $input = ucwords($input);
+                break;
+        }
+        
+        // Clean up extra spaces
+        $input = preg_replace('/\s+/', ' ', trim($input));
+        
+        return $input;
+    }
+
+    /**
+     * Make chat completion request
+     */
+    public function makeChatCompletion(array $params): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/chat/completions', $params);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = trim($data['choices'][0]['message']['content'] ?? '');
+                
+                return [
+                    'success' => true,
+                    'content' => $content,
+                    'usage' => $data['usage'] ?? []
+                ];
+            }
+
+            Log::warning('OpenAI chat completion error', [
+                'params' => $params,
+                'response' => $response->json()
+            ]);
+
+            return [
+                'success' => false,
+                'content' => 'I apologize, but I\'m having trouble processing your request. Please try again.',
+                'error' => 'API request failed'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('OpenAI chat completion exception', [
+                'params' => $params,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'content' => 'I apologize, but I encountered an error. Please try again.',
+                'error' => $e->getMessage()
+            ];
+        }
     }
 }
