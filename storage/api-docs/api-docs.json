@@ -15,12 +15,12 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api",
-            "description": "Local Development Server"
-        },
-        {
             "url": "https://api.healthdeskplus.com/api",
             "description": "Production Server"
+        },
+        {
+            "url": "http://localhost:8000/api",
+            "description": "Local Development Server"
         }
     ],
     "paths": {
@@ -5869,6 +5869,22 @@
             "description": "Social authentication endpoints"
         },
         {
+            "name": "AI Onboarding Assistant",
+            "description": "AI onboarding assistant endpoints"
+        },
+        {
+            "name": "Document Processing",
+            "description": "Document processing endpoints"
+        },
+        {
+            "name": "Language Support",
+            "description": "Language support endpoints"
+        },
+        {
+            "name": "Profile Completeness",
+            "description": "Profile completeness endpoints"
+        },
+        {
             "name": "Dashboard",
             "description": "Dashboard and analytics endpoints"
         },
@@ -5879,22 +5895,6 @@
         {
             "name": "Appointments",
             "description": "Appointment scheduling and management endpoints"
-        },
-        {
-            "name": "AI Onboarding Assistant",
-            "description": "AI Onboarding Assistant"
-        },
-        {
-            "name": "Document Processing",
-            "description": "Document Processing"
-        },
-        {
-            "name": "Language Support",
-            "description": "Language Support"
-        },
-        {
-            "name": "Profile Completeness",
-            "description": "Profile Completeness"
         }
     ]
 }

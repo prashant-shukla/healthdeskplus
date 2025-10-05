@@ -59,6 +59,26 @@ use OpenApi\Annotations as OA;
  * )
  * 
  * @OA\Tag(
+ *     name="AI Onboarding Assistant",
+ *     description="AI onboarding assistant endpoints"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Document Processing",
+ *     description="Document processing endpoints"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Language Support",
+ *     description="Language support endpoints"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Profile Completeness",
+ *     description="Profile completeness endpoints"
+ * )
+ * 
+ * @OA\Tag(
  *     name="Dashboard",
  *     description="Dashboard and analytics endpoints"
  * )
