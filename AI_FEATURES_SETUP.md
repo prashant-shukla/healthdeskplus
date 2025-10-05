@@ -242,7 +242,7 @@ php artisan serve
 7. Wait 5-10 minutes for changes to propagate
 
 #### 2.2. Production Environment Issues
-**Error**: `"Method doesn't allow unregistered callers"` in production but works locally
+**Error**: `"Translation service not available"` or `"Method doesn't allow unregistered callers"` in production but works locally
 
 **Solution**:
 1. **Clear configuration cache** in production:
@@ -258,7 +258,18 @@ php artisan serve
 
 3. **Check API key restrictions** - ensure the API key allows requests from your production server's IP address
 
-4. **Fallback mechanism**: The service now includes a fallback to direct API calls if the Google Translate client fails
+4. **Production mode**: The service automatically uses direct API calls in production environment instead of the Google Translate client
+
+5. **Fallback mechanism**: The service includes a fallback to direct API calls if the Google Translate client fails
+
+#### 2.3. Google Translate Client Issues in Production
+**Error**: `"Translation service not available"` - Google Translate client not available
+
+**Solution**:
+- The service now automatically detects production environment and uses direct API calls
+- No need to install Google Translate client in production
+- Direct API calls are more reliable in production environments
+- Both translation and language detection work via direct API calls
 
 #### 3. Credentials file errors
 - Make sure the Google Cloud Vision credentials file exists
@@ -293,7 +304,29 @@ curl -X 'POST' \
     "source_language": "en",
     "target_language": "hi",
     "translated": true,
-    "confidence": 0.95
+    "confidence": 1.0
+  }
+}
+```
+
+#### Test Language Detection
+```bash
+curl -X 'POST' \
+  'https://api.healthdeskplus.com/api/ai/detect-language' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "text": "नमस्ते, आप कैसे हैं?"
+}'
+
+# Expected response:
+{
+  "success": true,
+  "data": {
+    "language": "hi",
+    "confidence": 0.95,
+    "language_name": "Hindi",
+    "native_name": "हिन्दी"
   }
 }
 ```

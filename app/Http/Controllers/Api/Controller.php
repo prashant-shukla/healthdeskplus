@@ -21,13 +21,13 @@ use OpenApi\Annotations as OA;
  * )
  * 
  * @OA\Server(
- *     url="http://localhost:8000/api",
- *     description="Local Development Server"
+ *     url="https://api.healthdeskplus.com/api",
+ *     description="Production Server"
  * )
  * 
  * @OA\Server(
- *     url="https://api.healthdeskplus.com/api",
- *     description="Production Server"
+ *     url="http://localhost:8000/api",
+ *     description="Local Development Server"
  * )
  * 
  * @OA\SecurityScheme(
