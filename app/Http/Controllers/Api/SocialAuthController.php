@@ -211,6 +211,7 @@ class SocialAuthController extends Controller
             
             $url = Socialite::driver('facebook')
                 ->stateless()
+                ->scopes(['public_profile', 'email'])
                 ->redirect()
                 ->getTargetUrl();
             
